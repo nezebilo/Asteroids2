@@ -1,5 +1,6 @@
 package com.example.asteroids2;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
@@ -19,6 +20,14 @@ public class HelloApplication extends Application {
 
         UFO ufo = new UFO();
         root.getChildren().add(ufo.getBody());
+
+        new AnimationTimer() {
+
+            @Override
+            public void handle(long now) {
+                ufo.move();
+            }
+        }.start();
 
         stage.setTitle("Hello!");
         stage.setScene(scene);

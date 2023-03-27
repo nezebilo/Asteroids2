@@ -59,7 +59,6 @@ public class UFO {
     }
 
     public void move() {
-        xpos += 1;
-        this.drawUFO();
+        this.body.setTranslateX(this.body.getTranslateX() + 2.0);
     }
 }
