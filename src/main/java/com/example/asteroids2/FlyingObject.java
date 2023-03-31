@@ -5,41 +5,49 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 
 public class FlyingObject {
-    private final Polygon body; // body of object
+    private final Polygon body; // shape of object: facing the positive X-Axis
     private Point2D movementPerFrame; // momentum vector: speed and direction
     private final Team team; // 3 teams; see enum class "Team"
 
-    public FlyingObject(Polygon body, int directionAngleWithXAxis, int speed, Team team) {
-        // check for illegal arguments:
-        if (directionAngleWithXAxis < 0 || directionAngleWithXAxis >= 360)
-            throw new IllegalArgumentException();
+    public FlyingObject(Polygon body, double speed, Team team) {
         this.body = body;
-        // set movement per frame
-        this.movementPerFrame = setMovement(directionAngleWithXAxis, speed);
-        // assign team; only takes damage when different teams clash
+        this.movementPerFrame = createMovement(speed);
         this.team = team;
     }
 
     public FlyingObject(int positionX, int positionY,
-                        int[][] cornerOffsets,
-                        int directionAngleWithXAxis, int speed, Team team) {
+                        int[][] cornerCoordinates,
+                        int angleWithXAxis, int speed, Team team) {
         this(
-                createShape(positionX, positionY, cornerOffsets),
-                directionAngleWithXAxis, speed, team);
+                createShape(positionX, positionY, cornerCoordinates, angleWithXAxis),
+                speed, team
+        );
     }
 
-    private static Polygon createShape(int positionX, int positionY, int[][] cornersCoordinates) {
+    private static Polygon createShape(int positionX, int positionY, int[][] cornersCoordinates, int angleWithXAxis) {
+        // note that the shape created here should face positive x-axis;
+        // the rotation will later be done with body.setRotate() below
+
+        // angleWithXAxis [0, 360) is the clock-wise angle between
+        // this object's movement direction
+        // and the positive x-axis
+        // so if the movement direction is straight up: direction angle would be = 270
+
         // cornersCoordinates can be provided by each subclass - see PlayerShip class
         // which is a 2-D array: Double[corners][2]
         // i.e. cornersCoordinates.length = number of corners this polygon has
 
-        if (cornersCoordinates[0].length != 2)
+        if (cornersCoordinates[0].length != 2 ||
+                angleWithXAxis < 0 || angleWithXAxis >= 360)
             throw new IllegalArgumentException();
 
         Polygon body = new Polygon();
-        // set the position of this object's body
+        // set the position and rotate of this object's body
         body.setTranslateX(positionX);
         body.setTranslateY(positionY);
+        // e.g. flips playerShip from facing right to facing up;
+        // necessary for correct implementation of move(), turn() and applyThrust()
+        body.setRotate(angleWithXAxis);
 
         int corners = cornersCoordinates.length;
         Double[] corner_coordinates = new Double[2 * corners]; // x & y for each corner
@@ -55,16 +63,22 @@ public class FlyingObject {
         return body;
     }
 
-    private Point2D setMovement(double angle, double speed) {
-        // directionAngle [0, 360) is the clock-wise angle between
-        // this object's movement direction
-        // and the positive x-axis
-        // so if the movement direction is straight up: direction angle would be = 270
+    private Point2D createMovement(double speed) {
+        // get the direction that this object is pointing at (in radians)
+        double bodyRadians = this.getBody().getRotate();
 
         // deconstruct the direction into length along X and Y axes
-        double x = speed * Math.cos(Math.toRadians(angle));
-        double y = speed * Math.sin(Math.toRadians(angle));
+        double x = speed * Math.cos(bodyRadians);
+        double y = speed * Math.sin(bodyRadians);
         return new Point2D(x, y);
+    }
+
+    protected Point2D getMovementPerFrame() { // defined for ships which would change direction
+        return this.movementPerFrame;
+    }
+
+    protected void setMovementPerFrame(Point2D movementPerFrame) { // defined for ships which would change direction
+        this.movementPerFrame = movementPerFrame;
     }
 
     public Polygon getBody() {
