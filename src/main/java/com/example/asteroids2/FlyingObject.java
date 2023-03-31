@@ -17,7 +17,7 @@ public class FlyingObject {
 
     public FlyingObject(int positionX, int positionY,
                         int[][] cornerCoordinates,
-                        int angleWithXAxis, int speed, Team team) {
+                        int angleWithXAxis, double speed, Team team) {
         this(
                 createShape(positionX, positionY, cornerCoordinates, angleWithXAxis),
                 speed, team

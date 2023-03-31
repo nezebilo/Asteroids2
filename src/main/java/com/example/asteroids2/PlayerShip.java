@@ -22,11 +22,12 @@ public class PlayerShip extends FlyingObject {
         // FACING POSITIVE X-AXIS
         // it will be flipped 270 degrees to face up toward positive y-axis
 
+        int size = 10;
         return new int[][]{
-                {10, 0}, // top corner
-                {-10, -10}, // bottom left corner
-                {-5, 0},
-                {-10, 10} // bottom right corner
+                {size, 0}, // top corner
+                {-size, -size}, // bottom left corner
+                {-size / 2, 0},
+                {-size, size} // bottom right corner
         };
     }
 

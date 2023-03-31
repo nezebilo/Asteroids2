@@ -28,14 +28,14 @@ public class GameStart extends Application {
         createObjects(pane);
         trackKeyboard(scene);
 
-        AnimationTimer animationTimer = animationManager();
+        AnimationTimer animationTimer = animationManager(pane);
         animationTimer.start();
 
         stage.setScene(scene);
         stage.show();
     }
 
-    private AnimationTimer animationManager() {
+    private AnimationTimer animationManager(Pane pane) {
         return new AnimationTimer() {
             @Override
             public void handle(long l) {
@@ -48,6 +48,11 @@ public class GameStart extends Application {
                 // let all objects move
                 for (FlyingObject object : flyingObjects)
                     object.move();
+
+                //todo: remove: testing playership's collision method
+                if (flyingObjects.get(0).collide(flyingObjects.get(1))) {
+                    stop();
+                }
             }
         };
     }
@@ -60,6 +65,7 @@ public class GameStart extends Application {
 
     private void createObjects(Pane pane) {
         // create flying objects and add to flyingObjects list
+        //todo: 2-D List - list[0]: player; list[1]: asteroid; list[3]: enemyShip: easier collision detection
         flyingObjects = new ArrayList<>();
 
         // create player ship at center of screen
@@ -67,9 +73,10 @@ public class GameStart extends Application {
         flyingObjects.add(this.playerShip);
 
         // create asteroids
+        SampleAsteroid asteroid = new SampleAsteroid();
+        flyingObjects.add(asteroid);
 
         for (FlyingObject object : flyingObjects)
             pane.getChildren().add(object.getBody());
-
     }
 }
