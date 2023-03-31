@@ -1,3 +1,6 @@
+# ian(jianyun Wu):
+src/main/java/com/example/asteroids2/[Tt]est*
+
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
