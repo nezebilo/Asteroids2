@@ -4,12 +4,16 @@ import javafx.geometry.Point2D;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 
-public class FlyingObject {
+import java.util.List;
+
+public abstract class FlyingObject {
+    private boolean isAlive;
     private final Polygon body; // shape of object: facing the positive X-Axis
     private Point2D movementPerFrame; // momentum vector: speed and direction
     private final Team team; // 3 teams; see enum class "Team"
 
     public FlyingObject(Polygon body, double speed, Team team) {
+        this.isAlive = true;
         this.body = body;
         this.movementPerFrame = createMovement(speed);
         this.team = team;
@@ -85,6 +89,10 @@ public class FlyingObject {
         return this.body;
     }
 
+    public Team getTeam() {
+        return this.team;
+    }
+
     public void move() {
         // this method should be called in every frame
         // so this method just moves the object in the direction specified in this.movementPerFrame
@@ -103,11 +111,29 @@ public class FlyingObject {
         this.body.setTranslateY(newY);
     }
 
-    public boolean collide(FlyingObject other) {
-        // only collide with object of different team
-        if (other.team == this.team) return false;
-        // detect intersection with object of different team
-        Shape collisionArea = Shape.intersect(this.body, other.body);
-        return collisionArea.getBoundsInLocal().getWidth() > 0;
+    public boolean isAlive() {
+        return this.isAlive;
     }
+
+    protected void setAlive(boolean isAlive) {
+        this.isAlive = isAlive;
+    }
+
+    public static boolean checkCollision(FlyingObject one, FlyingObject two) {
+        // only collide with object of different team
+        if (one.team == two.team) return false;
+        // detect intersection with object of different team
+        Shape collisionArea = Shape.intersect(one.body, two.body);
+        if (collisionArea.getBoundsInLocal().getWidth() > 0){
+            one.setAlive(false);
+            two.setAlive(false);
+            return true;
+        }
+        return false;
+    }
+
+    // player ship: return new ship with lowered HP / null when HP = 0
+    // asteroid: returns 2 smaller asteroids / null when it's small asteroid
+    // bullets & player ship: return null
+    public abstract List<FlyingObject> collideAction();
 }

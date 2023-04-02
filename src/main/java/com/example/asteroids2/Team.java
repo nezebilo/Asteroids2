@@ -1,7 +1,7 @@
 package com.example.asteroids2;
 
 public enum Team {
-    PLAYER,
+    PLAYER, // player ship & player bullet
     ASTEROID,
-    ENEMY
+    ENEMY // enemy ship & enemy bullet
 }

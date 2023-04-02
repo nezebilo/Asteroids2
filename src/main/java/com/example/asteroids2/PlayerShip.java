@@ -3,17 +3,30 @@ package com.example.asteroids2;
 
 import javafx.geometry.Point2D;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class PlayerShip extends FlyingObject {
     // todo: thrust; invincible period after respawning;
     private int HP;
+    private int respawnX, respawnY;
 
-    public PlayerShip(int positionX, int positionY) {
+    public PlayerShip(int positionX, int positionY, int HP) {
         super(positionX, positionY,
                 shipCorners(),
                 270, // points straight up
                 0, // when first created the player ship shouldn't move
                 Team.PLAYER);
-        this.HP = 3;
+        this.HP = HP;
+        respawnX = positionX;
+        respawnY = positionY;
+    }
+
+    public PlayerShip(int HP) { // create by default at center of screen
+        this(GameStart.WIDTH / 2,
+                GameStart.HEIGHT / 2,
+                HP);
     }
 
     private static int[][] shipCorners() {
@@ -48,5 +61,19 @@ public class PlayerShip extends FlyingObject {
         Point2D newMovement = this.getMovementPerFrame().add(x_change, y_change);
         // apply change
         this.setMovementPerFrame(newMovement);
+    }
+
+    @Override
+    public List<FlyingObject> collideAction() {
+        // has remaining health: return list of a single playership
+        // todo: implement respawn invincibility
+        assert !this.isAlive(); // this method should only be called if this ship is not alive
+        if (HP > 0) {
+            return new ArrayList<>(
+                    Collections.singletonList(
+                            new PlayerShip(respawnX, respawnY, HP - 1)
+                    )
+            );
+        } else return null;
     }
 }

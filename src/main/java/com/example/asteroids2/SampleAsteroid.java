@@ -1,5 +1,6 @@
 package com.example.asteroids2;
 
+import java.util.List;
 import java.util.Random;
 
 public class SampleAsteroid extends FlyingObject {
@@ -30,8 +31,8 @@ public class SampleAsteroid extends FlyingObject {
     }
 
     private static int[][] asteroidCorners() {
-        int size = 20;
-        int corners = 6;
+        int size = 40;
+        int corners = 10;
         int[][] cornerCoordinates = new int[corners][2];
         Random random = new Random();
         for (int i = 0; i < corners; i++) {
@@ -39,5 +40,10 @@ public class SampleAsteroid extends FlyingObject {
             cornerCoordinates[i][1] = random.nextInt(-size, size);
         }
         return cornerCoordinates;
+    }
+
+    @Override
+    public List<FlyingObject> collideAction() {
+        return null;
     }
 }
