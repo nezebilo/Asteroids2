@@ -124,9 +124,14 @@ public abstract class FlyingObject {
         if (one.team == two.team) return false;
         // detect intersection with object of different team
         Shape collisionArea = Shape.intersect(one.body, two.body);
-        if (collisionArea.getBoundsInLocal().getWidth() > 0){
-            one.setAlive(false);
-            two.setAlive(false);
+        // if there is collision
+        if (collisionArea.getBoundsInLocal().getWidth() > 0) {
+            // check if one of the collided objects is playership that's within invincibility window after respawning
+            FlyingObject[] collidedObjs = new FlyingObject[]{one, two};
+            for (FlyingObject obj : collidedObjs){
+                // setAlive(true) if it's an invincible player ship; false otherwise
+                obj.setAlive(obj instanceof PlayerShip && ((PlayerShip) obj).isInvincible());
+            }
             return true;
         }
         return false;
@@ -134,6 +139,6 @@ public abstract class FlyingObject {
 
     // player ship: return new ship with lowered HP / null when HP = 0
     // asteroid: returns 2 smaller asteroids / null when it's small asteroid
-    // bullets & player ship: return null
+    // bullets &  ship: return null
     public abstract List<FlyingObject> collideAction();
 }

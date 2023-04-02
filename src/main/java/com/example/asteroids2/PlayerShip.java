@@ -2,31 +2,51 @@ package com.example.asteroids2;
 
 
 import javafx.geometry.Point2D;
+import javafx.scene.paint.Color;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class PlayerShip extends FlyingObject {
-    // todo: thrust; invincible period after respawning;
-    private int HP;
-    private int respawnX, respawnY;
+    private final static int INVINCIBILITY_WINDOW_IN_SECONDS = 3;
+    // todo: fire bullet; hyperspace jump
+    private final int remainingLives;
+    private final int respawnX, respawnY;
+    private final boolean respawn;
+    private final LocalDateTime createTime;
 
-    public PlayerShip(int positionX, int positionY, int HP) {
+    public PlayerShip(int positionX, int positionY, int remainingLives, boolean respawn) {
         super(positionX, positionY,
                 shipCorners(),
                 270, // points straight up
                 0, // when first created the player ship shouldn't move
                 Team.PLAYER);
-        this.HP = HP;
+        this.remainingLives = remainingLives;
         respawnX = positionX;
         respawnY = positionY;
+        this.respawn = respawn;
+        this.createTime = LocalDateTime.now();
+
     }
 
-    public PlayerShip(int HP) { // create by default at center of screen
+    public PlayerShip(int remainingLives, boolean respawn) { // create by default at center of screen
         this(GameStart.WIDTH / 2,
                 GameStart.HEIGHT / 2,
-                HP);
+                remainingLives,
+                respawn);
+    }
+
+    public PlayerShip(int remainingLives) {
+        this(remainingLives, false);
+    }
+
+    public boolean isInvincible() {
+        if (!respawn) return false;
+        Duration timeAfterRespawn = Duration.between(createTime, LocalDateTime.now());
+        return timeAfterRespawn.toSeconds() < INVINCIBILITY_WINDOW_IN_SECONDS;
     }
 
     private static int[][] shipCorners() {
@@ -65,15 +85,23 @@ public class PlayerShip extends FlyingObject {
 
     @Override
     public List<FlyingObject> collideAction() {
-        // has remaining health: return list of a single playership
+        // has remaining health: return list of a single player ship
         // todo: implement respawn invincibility
         assert !this.isAlive(); // this method should only be called if this ship is not alive
-        if (HP > 0) {
+        if (remainingLives > 1) {
             return new ArrayList<>(
                     Collections.singletonList(
-                            new PlayerShip(respawnX, respawnY, HP - 1)
+                            new PlayerShip(respawnX, respawnY, remainingLives - 1, true)
                     )
             );
         } else return null;
+    }
+
+    @Override
+    public void move() {
+        if (this.isInvincible())
+            this.getBody().setFill(Color.RED);
+        else this.getBody().setFill(Color.BLACK);
+        super.move();
     }
 }

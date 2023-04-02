@@ -10,11 +10,11 @@ import javafx.stage.Stage;
 import java.util.*;
 
 public class GameStart extends Application {
-    public static int WIDTH = 600;
-    public static int HEIGHT = 600;
+    public final static int WIDTH = 600;
+    public final static int HEIGHT = 600;
 
-    private static int INITIAL_HP = 3;
-    private static int INITIAL_ASTEROIDS = 5;
+    private final static int PLAYER_LIVES = 3;
+    private final static int INITIAL_ASTEROIDS = 5;
 
     private HashMap<Team, List<FlyingObject>> teamsOfFlyingObjects;
     private PlayerShip playerShip;
@@ -45,6 +45,9 @@ public class GameStart extends Application {
                 moveAllObjects();
                 checkCollisionBetweenTeams();
                 resolveCollisions();
+                // this will be true only when the player ship is removed from the pane
+                // and no new player ship was returned from playerShip.collideAction();
+                // meaning: when playerShip's remaining lives = 0
                 if (!playerShip.isAlive()) stop();
             }
         };
@@ -59,7 +62,7 @@ public class GameStart extends Application {
                 FlyingObject current = iterator.next();
                 // if this object collided with another
                 if (!current.isAlive()) {
-                    // get new flying objects after collision: playership - new playership; asteroid: smaller asteroids
+                    // get new flying objects after collision: player ship - new player ship; asteroid: smaller asteroids
                     List<FlyingObject> newObjs = current.collideAction();
                     // remove this object from game
                     iterator.remove();
@@ -120,7 +123,7 @@ public class GameStart extends Application {
         teamsOfFlyingObjects = new HashMap<>();
 
         // create player ship at center of screen
-        this.playerShip = new PlayerShip(INITIAL_HP);
+        this.playerShip = new PlayerShip(PLAYER_LIVES);
         teamsOfFlyingObjects.put(playerShip.getTeam(),
                 new ArrayList<>(Collections.singletonList(playerShip)));
 
