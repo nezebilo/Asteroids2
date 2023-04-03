@@ -18,6 +18,9 @@ public class PlayerShip extends FlyingObject {
     private final boolean respawn;
     private final LocalDateTime createTime;
 
+//    private static int thrust =
+
+
     public PlayerShip(int positionX, int positionY, int remainingLives, boolean respawn) {
         super(positionX, positionY,
                 shipCorners(),
@@ -71,7 +74,7 @@ public class PlayerShip extends FlyingObject {
     }
 
     public void applyThrust() {
-        double incrementalSpeed = 0.05;
+        double incrementalSpeed = 0.01;
         // get the radians of the angle the ship is pointing at
         double radians = Math.toRadians(this.getBody().getRotate());
         // deconstruct the incremental speed into x & y axes

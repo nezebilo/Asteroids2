@@ -8,13 +8,15 @@ import java.util.List;
 
 public abstract class FlyingObject {
     private boolean isAlive;
-    private final Polygon body; // shape of object: facing the positive X-Axis
-    private Point2D movementPerFrame; // momentum vector: speed and direction
-    private final Team team; // 3 teams; see enum class "Team"
+    protected Polygon body; // shape of object: facing the positive X-Axis
+    protected Point2D movementPerFrame; // momentum vector: speed and direction
+    private Team team; // 3 teams; see enum class "Team"
 
     protected int positionX;
     protected int positionY;
 
+    public FlyingObject(){
+    }
     public FlyingObject(int positionX, int positionY,
                         int[][] cornerCoordinates,
                         int angleWithXAxis, double speed, Team team) {
@@ -139,4 +141,12 @@ public abstract class FlyingObject {
     // asteroid: returns 2 smaller asteroids / null when it's small asteroid
     // bullets &  ship: return null
     public abstract List<FlyingObject> collideAction();
+
+    public int getPositionX() {
+        return positionX;
+    }
+
+    public int getPositionY() {
+        return positionY;
+    }
 }

@@ -23,6 +23,8 @@ public class GameStart extends Application {
     //store all projectiles
     private List<Projectile> projectiles = new ArrayList<>();
 
+    private long lastFireTime;
+
     @Override
     public void start(Stage stage) throws Exception {
         this.pane = new Pane();
@@ -44,10 +46,10 @@ public class GameStart extends Application {
             @Override
             public void handle(long l) {
                 playerShipControls();
+                projectiles();
                 moveAllObjects();
                 checkCollisionBetweenTeams();
                 resolveCollisions();
-                projectiles();
                 // this will be true only when the player ship is removed from the pane
                 // and no new player ship was returned from playerShip.collideAction();
                 // meaning: when playerShip's remaining lives = 0
@@ -58,20 +60,24 @@ public class GameStart extends Application {
 
     private void projectiles() {
         if (keysPressed.getOrDefault(KeyCode.SPACE, false)) {
+            //control the interval of firing, millisecond
+            if (System.currentTimeMillis() - lastFireTime > 500){
+                lastFireTime = System.currentTimeMillis();
+                Projectile projectile = new Projectile((int) playerShip.getBody().getTranslateX(), (int) playerShip.getBody().getTranslateY());
+                projectile.getProjectile().setRotate(playerShip.getBody().getRotate());
+                projectile.getProjectile().setRotate(playerShip.getBody().getRotate());
+                projectiles.add(projectile);
 
-            Projectile projectile = new Projectile((int) playerShip.getBody().getTranslateX(),
-                    (int) playerShip.getBody().getTranslateY());
-            projectile.getProjectile().setRotate(playerShip.getBody().getRotate());
-            projectiles.add(projectile);
+                projectile.accelerate();
+                projectile.setMovementPerFrame(projectile.getMovementPerFrame().normalize().multiply(3));
 
-            projectile.accelerate();
-            projectile.setMovement(projectile.getMovement().normalize().multiply(3));
-
-            pane.getChildren().add(projectile.getProjectile());
-        }
+                pane.getChildren().add(projectile.getProjectile());
+                }
+            }
         //make all projectiles move
         projectiles.forEach(projectile -> projectile.move());
     }
+
 
     private void resolveCollisions() {
         //todo: remove flying objects that collided, and add resultant new objects to pane
@@ -102,9 +108,12 @@ public class GameStart extends Application {
     }
 
     private void moveAllObjects() {
-        for (List<FlyingObject> team : teamsOfFlyingObjects.values())
-            for (FlyingObject object : team)
+        for (List<FlyingObject> team : teamsOfFlyingObjects.values()) {
+            for (FlyingObject object : team) {
                 object.move();
+            }
+        }
+
     }
 
     private void playerShipControls() {
