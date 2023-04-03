@@ -20,6 +20,8 @@ public class GameStart extends Application {
     private PlayerShip playerShip;
     private Pane pane;
     private HashMap<KeyCode, Boolean> keysPressed;
+    //store all projectiles
+    private List<Projectile> projectiles = new ArrayList<>();
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -45,12 +47,30 @@ public class GameStart extends Application {
                 moveAllObjects();
                 checkCollisionBetweenTeams();
                 resolveCollisions();
+                projectiles();
                 // this will be true only when the player ship is removed from the pane
                 // and no new player ship was returned from playerShip.collideAction();
                 // meaning: when playerShip's remaining lives = 0
                 if (!playerShip.isAlive()) stop();
             }
         };
+    }
+
+    private void projectiles() {
+        if (keysPressed.getOrDefault(KeyCode.SPACE, false)) {
+
+            Projectile projectile = new Projectile((int) playerShip.getBody().getTranslateX(),
+                    (int) playerShip.getBody().getTranslateY());
+            projectile.getProjectile().setRotate(playerShip.getBody().getRotate());
+            projectiles.add(projectile);
+
+            projectile.accelerate();
+            projectile.setMovement(projectile.getMovement().normalize().multiply(3));
+
+            pane.getChildren().add(projectile.getProjectile());
+        }
+        //make all projectiles move
+        projectiles.forEach(projectile -> projectile.move());
     }
 
     private void resolveCollisions() {

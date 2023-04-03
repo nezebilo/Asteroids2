@@ -12,23 +12,21 @@ public abstract class FlyingObject {
     private Point2D movementPerFrame; // momentum vector: speed and direction
     private final Team team; // 3 teams; see enum class "Team"
 
-    public FlyingObject(Polygon body, double speed, Team team) {
-        this.isAlive = true;
-        this.body = body;
-        this.movementPerFrame = createMovement(speed);
-        this.team = team;
-    }
+    protected int positionX;
+    protected int positionY;
 
     public FlyingObject(int positionX, int positionY,
                         int[][] cornerCoordinates,
                         int angleWithXAxis, double speed, Team team) {
-        this(
-                createShape(positionX, positionY, cornerCoordinates, angleWithXAxis),
-                speed, team
-        );
+        this.isAlive = true;
+        this.positionX = positionX;
+        this.positionY = positionY;
+        this.body = createShape(positionX, positionY, cornerCoordinates, angleWithXAxis);
+        this.movementPerFrame = createMovement(speed);
+        this.team = team;
     }
 
-    private static Polygon createShape(int positionX, int positionY, int[][] cornersCoordinates, int angleWithXAxis) {
+    protected static Polygon createShape(int positionX, int positionY, int[][] cornersCoordinates, int angleWithXAxis) {
         // note that the shape created here should face positive x-axis;
         // the rotation will later be done with body.setRotate() below
 
@@ -67,7 +65,7 @@ public abstract class FlyingObject {
         return body;
     }
 
-    private Point2D createMovement(double speed) {
+    protected Point2D createMovement(double speed) {
         // get the direction that this object is pointing at (in radians)
         double bodyRadians = this.getBody().getRotate();
 
@@ -86,7 +84,7 @@ public abstract class FlyingObject {
     }
 
     public Polygon getBody() {
-        return this.body;
+        return body;
     }
 
     public Team getTeam() {
