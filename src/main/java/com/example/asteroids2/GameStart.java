@@ -8,6 +8,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GameStart extends Application {
     public final static int WIDTH = 600;
@@ -20,8 +21,8 @@ public class GameStart extends Application {
     private PlayerShip playerShip;
     private Pane pane;
     private HashMap<KeyCode, Boolean> keysPressed;
-    //store all projectiles
-    private List<Projectile> projectiles = new ArrayList<>();
+    //store all bullets
+    private List<Bullet> bullets = new ArrayList<>();
 
     private long lastFireTime;
 
@@ -46,7 +47,8 @@ public class GameStart extends Application {
             @Override
             public void handle(long l) {
                 playerShipControls();
-                projectiles();
+                fire();
+                removeBullets();
                 moveAllObjects();
                 checkCollisionBetweenTeams();
                 resolveCollisions();
@@ -58,25 +60,47 @@ public class GameStart extends Application {
         };
     }
 
-    private void projectiles() {
-        if (keysPressed.getOrDefault(KeyCode.SPACE, false)) {
-            //control the interval of firing, millisecond
-            if (System.currentTimeMillis() - lastFireTime > 500){
-                lastFireTime = System.currentTimeMillis();
-                Projectile projectile = new Projectile((int) playerShip.getBody().getTranslateX(), (int) playerShip.getBody().getTranslateY());
-                projectile.getProjectile().setRotate(playerShip.getBody().getRotate());
-                projectile.getProjectile().setRotate(playerShip.getBody().getRotate());
-                projectiles.add(projectile);
+    private void fire() {
+            //only 10 bullets exist at the same time
+            if (keysPressed.getOrDefault(KeyCode.SPACE, false) && bullets.size() < 10) {
+                //fire interval is 500 ms
+                if (System.currentTimeMillis() - lastFireTime > 500) {
+                    lastFireTime = System.currentTimeMillis();
+                    Bullet bullet = new Bullet((int) playerShip.getBody().getTranslateX(), (int) playerShip.getBody().getTranslateY());
+                    bullet.getShape().setRotate(playerShip.getBody().getRotate());
+                    bullets.add(bullet);
 
-                projectile.accelerate();
-                projectile.setMovementPerFrame(projectile.getMovementPerFrame().normalize().multiply(3));
-
-                pane.getChildren().add(projectile.getProjectile());
+                    bullet.accelerate();
+                    bullet.setMovement(bullet.getMovement().normalize().multiply(3));
+                    pane.getChildren().add(bullet.getShape());
                 }
             }
-        //make all projectiles move
-        projectiles.forEach(projectile -> projectile.move());
+            //make all bullets move
+            bullets.forEach(bullet -> bullet.move());
+        }
+
+    public void removeBullets() {
+        //Label bullets that have timed out
+        bullets.forEach(projectile -> {
+            //the projectile will be removed after 10 seconds
+            if ((System.currentTimeMillis() - projectile.getCreateTime()) >= 10000) {
+                projectile.setIsALive(false);
+            }
+        });
+
+        //remove bullets that have been marked as dead
+        bullets.stream()
+                .filter(projectile -> !projectile.getIsALive())
+                .forEach(projectile -> {
+                    pane.getChildren().remove(projectile.getShape());
+                });
+
+        bullets.removeAll(bullets.stream()
+                .filter(projectile -> !projectile.getIsALive())
+                .collect(Collectors.toList()));
+
     }
+
 
 
     private void resolveCollisions() {
