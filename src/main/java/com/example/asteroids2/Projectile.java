@@ -2,8 +2,7 @@ package com.example.asteroids2;
 
 import javafx.scene.shape.Polygon;
 
-public class Projectile extends Role{
-
+public class Projectile extends Group {
     public Projectile(int x, int y) {
         super(new Polygon(2, -2, 2, 2, -2, 2, -2, -2), x, y);
     }
@@ -14,6 +13,8 @@ public class Projectile extends Role{
 
         changeX *= 10;
         changeY *= 10;
+
+        this.createTime = System.currentTimeMillis();
 
         this.movement = this.movement.add(changeX, changeY);
     }

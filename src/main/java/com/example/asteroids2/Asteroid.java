@@ -4,20 +4,25 @@ import javafx.scene.shape.Polygon;
 
 import java.util.Random;
 
-public class Asteroid extends Role{
-    private double rotationalMovement;
-    public Asteroid(int x, int y) {
-        super(createPolygon(), x, y);
+public class Asteroid extends Group {
+    protected double rotationalMovement;
+    private int accelerationAmount;
 
+    //control the size of each asteroid
+    protected int size;
+
+    protected int speedTimes;
+    public Asteroid(int x, int y, int speedTimes, int size) {
+        super(createPolygon(size), x, y);
+        this.size=size;
+        //Set it to rotate at a random angle
         Random rnd = new Random();
-
         super.getShape().setRotate(rnd.nextInt(360));
 
-        int accelerationAmount = 1 + rnd.nextInt(10);
-        for (int i = 0; i < accelerationAmount; i++) {
-            accelerate();
-        }
-
+        //control the speed of a created asteroid
+        this.speedTimes = speedTimes;
+        getAccelerationAmount(speedTimes);
+        //Set it spin
         this.rotationalMovement = 0.5 - rnd.nextDouble();
     }
 
@@ -31,10 +36,10 @@ public class Asteroid extends Role{
         this.movement = this.movement.add(changeX, changeY);
     }
 
-    public static Polygon createPolygon() {
+    public static Polygon createPolygon(int times) {
         Random rnd = new Random();
 
-        double size = 10 + rnd.nextInt(10);
+        double size = 10*times + rnd.nextInt(10);
 
         Polygon polygon = new Polygon();
         double c1 = Math.cos(Math.PI * 2 / 5);
@@ -61,5 +66,44 @@ public class Asteroid extends Role{
     public void move() {
         super.move();
         super.getShape().setRotate(super.getShape().getRotate() + rotationalMovement);
+    }
+
+    public void getAccelerationAmount(int num) {
+        this.accelerationAmount = num;
+        for (int i = 0; i < accelerationAmount; i++) {
+            accelerate();
+        }
+    }
+
+    public double getRotationalMovement() {
+        return rotationalMovement;
+    }
+
+    public void setRotationalMovement(double rotationalMovement) {
+        this.rotationalMovement = rotationalMovement;
+    }
+
+    public int getAccelerationAmount() {
+        return accelerationAmount;
+    }
+
+    public void setAccelerationAmount(int accelerationAmount) {
+        this.accelerationAmount = accelerationAmount;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public int getSpeedTimes() {
+        return speedTimes;
+    }
+
+    public void setSpeedTimes(int speedTimes) {
+        this.speedTimes = speedTimes;
     }
 }

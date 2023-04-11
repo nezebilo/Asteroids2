@@ -4,15 +4,16 @@ import javafx.geometry.Point2D;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 
-public abstract class Role {
+public abstract class Group {
     protected Polygon shape;
     protected Point2D movement;
-
     protected boolean isAlive;
 
     protected int numOfDeath;
 
-    public Role(Polygon polygon, int x, int y) {
+    protected double createTime;
+
+    public Group(Polygon polygon, int x, int y) {
         this.shape = polygon;
         this.shape.setTranslateX(x);
         this.shape.setTranslateY(y);
@@ -21,6 +22,7 @@ public abstract class Role {
         //it means that once the object is destroyed, the numOfDeath of object will plus 1.
         this.numOfDeath = 0;
         this.movement = new Point2D(0, 0);
+        this.createTime = System.currentTimeMillis();
     }
 
     public Polygon getShape() {
@@ -28,11 +30,11 @@ public abstract class Role {
     }
 
     public void turnLeft() {
-        this.shape.setRotate(this.shape.getRotate() - 5);
+        this.shape.setRotate(this.shape.getRotate() - 2);
     }
 
     public void turnRight() {
-        this.shape.setRotate(this.shape.getRotate() + 5);
+        this.shape.setRotate(this.shape.getRotate() + 2);
     }
 
     public void move() {
@@ -56,12 +58,12 @@ public abstract class Role {
         }
     }
 
-    public void accelerate() {
+    public void accelerate(double coefficient) {
         double changeX = Math.cos(Math.toRadians(this.shape.getRotate()));
         double changeY = Math.sin(Math.toRadians(this.shape.getRotate()));
 
-        changeX *= 0.01;
-        changeY *= 0.01;
+        changeX *= 0.01 * coefficient;
+        changeY *= 0.01 * coefficient;
 
         this.movement = this.movement.add(changeX, changeY);
     }
@@ -82,7 +84,7 @@ public abstract class Role {
         this.isAlive = isAlive;
     }
 
-    public boolean collide(Role other) {
+    public boolean collide(Group other) {
         Shape collisionArea = Shape.intersect(this.shape, other.getShape());
         return collisionArea.getBoundsInLocal().getWidth() != -1;
     }
@@ -93,5 +95,13 @@ public abstract class Role {
 
     public void setNumOfDeath(int numOfDeath) {
         this.numOfDeath = numOfDeath;
+    }
+
+    public double getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(double createTime) {
+        this.createTime = createTime;
     }
 }
