@@ -18,7 +18,7 @@ public class HelloApplication extends Application {
         Group root = new Group();
         Scene scene = new Scene(root, 600, 600, Color.BLACK);
 
-        UFO ufo = new UFO();
+        EnemyShip ufo = new EnemyShip(50, 50);
         root.getChildren().add(ufo.getBody());
 
         new AnimationTimer() {
