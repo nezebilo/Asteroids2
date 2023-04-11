@@ -134,7 +134,7 @@ public class GameStart extends Application {
         teamsOfFlyingObjects.put(Team.ASTEROID, asteroids);
 
         // create enemy ship
-        EnemyShip enemyShip = new EnemyShip(100, 200);
+        EnemyShip enemyShip = new EnemyShip(20, 50);
         teamsOfFlyingObjects.put(enemyShip.getTeam(),
                 new ArrayList<>(Collections.singletonList(enemyShip)));
 

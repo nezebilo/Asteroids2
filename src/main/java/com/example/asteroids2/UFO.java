@@ -15,8 +15,8 @@ public class UFO {
     private Polygon body;
 
     public UFO() {
-        xpos = 300.0;
-        ypos = 300.0;
+        xpos = 100.0;
+        ypos = 100.0;
         body = new Polygon();
         drawUFO();
     }

@@ -1,10 +1,17 @@
 package com.example.asteroids2;
 
+import javafx.geometry.Point2D;
 import javafx.scene.transform.Scale;
 
 import java.util.List;
-
 public class EnemyShip extends FlyingObject {
+
+    // timer is used to create zig-zag movement
+    private int timer;
+    // interval is how long between changing vertical direction
+    private static int interval = 30;
+    // up tells whether to zag up or down
+    private boolean up = true;
     public EnemyShip(int positionX, int positionY) {
         super(positionX, positionY,
                 enemyShipCorners(),
@@ -12,6 +19,8 @@ public class EnemyShip extends FlyingObject {
                 2,
                 Team.ENEMY
         );
+
+        // scale the body to correct size
         Scale scale = new Scale();
         scale.setX(0.5);
         scale.setY(0.5);
@@ -19,6 +28,12 @@ public class EnemyShip extends FlyingObject {
         scale.setPivotY(this.getBody().getBoundsInParent().getCenterY());
 
         this.getBody().getTransforms().addAll(scale);
+
+        // set timer to 0
+        this.timer = 0;
+
+        Point2D movement = this.getMovementPerFrame();
+        this.setMovementPerFrame(new Point2D(movement.getX(), 1));
     }
 
     private static int[][] enemyShipCorners() {
@@ -42,6 +57,22 @@ public class EnemyShip extends FlyingObject {
     @Override
     public void move() {
         super.move();
+
+        if (this.timer >= this.interval) {
+            if (this.up) {
+                Point2D movement = this.getMovementPerFrame();
+                this.setMovementPerFrame(new Point2D(movement.getX(), -1));
+                this.up = false;
+            }
+            else {
+                Point2D movement = this.getMovementPerFrame();
+                this.setMovementPerFrame(new Point2D(movement.getX(), 1));
+                this.up = true;
+            }
+            this.timer = 0;
+        }
+
+        this.timer++;
     }
 
     @Override
