@@ -1,10 +1,11 @@
-package com.example.asteroids2;
+package com.example.asteroids2.Flyingobject;
 
+import com.example.asteroids2.Main;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 
-public abstract class Group {
+public abstract class FlyingObject {
     protected Polygon shape;
     protected Point2D movement;
     protected boolean isAlive;
@@ -13,7 +14,7 @@ public abstract class Group {
 
     protected double createTime;
 
-    public Group(Polygon polygon, int x, int y) {
+    public FlyingObject(Polygon polygon, int x, int y) {
         this.shape = polygon;
         this.shape.setTranslateX(x);
         this.shape.setTranslateY(y);
@@ -84,7 +85,7 @@ public abstract class Group {
         this.isAlive = isAlive;
     }
 
-    public boolean collide(Group other) {
+    public boolean collide(FlyingObject other) {
         Shape collisionArea = Shape.intersect(this.shape, other.getShape());
         return collisionArea.getBoundsInLocal().getWidth() != -1;
     }
@@ -101,7 +102,4 @@ public abstract class Group {
         return createTime;
     }
 
-    public void setCreateTime(double createTime) {
-        this.createTime = createTime;
-    }
 }

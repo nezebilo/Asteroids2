@@ -1,10 +1,10 @@
-package com.example.asteroids2;
+package com.example.asteroids2.Flyingobject;
 
 import javafx.scene.shape.Polygon;
 
 import java.util.Random;
 
-public class Asteroid extends Group {
+public class Asteroid extends FlyingObject {
     protected double rotationalMovement;
     private int accelerationAmount;
 
@@ -12,7 +12,7 @@ public class Asteroid extends Group {
     protected int size;
 
     protected int speedTimes;
-    public Asteroid(int x, int y, int speedTimes, int size) {
+    public Asteroid(int x, int y,  int size) {
         super(createPolygon(size), x, y);
         this.size=size;
         //Set it to rotate at a random angle
@@ -20,7 +20,7 @@ public class Asteroid extends Group {
         super.getShape().setRotate(rnd.nextInt(360));
 
         //control the speed of a created asteroid
-        this.speedTimes = speedTimes;
+        this.speedTimes = 1;
         getAccelerationAmount(speedTimes);
         //Set it spin
         this.rotationalMovement = 0.5 - rnd.nextDouble();

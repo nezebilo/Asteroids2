@@ -1,11 +1,10 @@
-package com.example.asteroids2;
+package com.example.asteroids2.Flyingobject;
 
-import javafx.css.Size;
 import javafx.scene.shape.Polygon;
 
 import java.util.Random;
 
-public class Alien extends Group{
+public class Alien extends FlyingObject {
     public Alien(int x, int y, int num) {
         super(new Polygon(-30.0, 0.0,
                 -8.0,-8.0,

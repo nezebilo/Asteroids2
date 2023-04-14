@@ -1,8 +1,8 @@
-package com.example.asteroids2;
+package com.example.asteroids2.Flyingobject;
 
 import javafx.scene.shape.Polygon;
 
-public class Projectile extends Group {
+public class Projectile extends FlyingObject {
     public Projectile(int x, int y) {
         super(new Polygon(2, -2, 2, 2, -2, 2, -2, -2), x, y);
     }

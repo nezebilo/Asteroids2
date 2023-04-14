@@ -1,8 +1,8 @@
 package com.example.asteroids2;
 
+import com.example.asteroids2.Flyingobject.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
 
 public class Main extends Application {
     protected Pane pane;
@@ -48,6 +49,14 @@ public class Main extends Application {
 
     protected Random random = new Random();
 
+    /*
+    *暂停游戏
+    * 飞船大小和速度成反比
+    * 减速
+    * 储存和获取最高分
+    * 优化menu/UI
+    * 改变游戏难度
+    */
     @Override
     public void start(Stage stage) throws Exception {
         //stage > scene > pane
@@ -90,9 +99,10 @@ public class Main extends Application {
                 fire();
                 alienFire();
                 collision();
-                moveAsteroid();
-                moveAlien();
+                moveObjects();
                 removeProjectiles();
+
+                changeLevel();
 
                 //Once a collision occurs, game stops
                 asteroids.forEach(asteroid -> {
@@ -117,7 +127,7 @@ public class Main extends Application {
         };
     }
 
-    private void checkCollisionOfShip(Group obj) throws Exception {
+    private void checkCollisionOfShip(FlyingObject obj) throws Exception {
         if (ship.collide(obj) && ship.getNumOfDeath() > 2 && !ship.isInvincibility()) {
             System.exit(0);
         } else if (ship.collide(obj) && !ship.isInvincibility()) {
@@ -155,7 +165,7 @@ public class Main extends Application {
         //create some lowest moving asteroids when a new game starts
         Random rnd = new Random();
         for (int i = 0; i < 5; i++) {
-            Asteroid asteroid = new Asteroid(rnd.nextInt(WIDTH), rnd.nextInt(HEIGHT),1,1);
+            Asteroid asteroid = new Asteroid(rnd.nextInt(WIDTH), rnd.nextInt(HEIGHT),3);
             //This shows that the newly generated asteroid will not be too close to the ship
             if (!asteroid.collide(ship)) {
                 asteroids.add(asteroid);
@@ -166,31 +176,13 @@ public class Main extends Application {
 
     private void createAsteroids(Pane pane) {
         //if a random number is less 0.005, a new asteroids will be added to the window.
-        if (Math.random() < 0.005) {
-            //If the game lasts less than 3 minutes, slower moving asteroids will be created
-            if (System.currentTimeMillis() - startTime <= 180000) {
-                Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, 1, random.nextInt(1,3));
-                if (!asteroid.collide(ship)) {
-                    asteroids.add(asteroid);
-                    pane.getChildren().add(asteroid.getShape());
-                }
-            //If the game lasts longer than 3 minutes, faster moving asteroids will be created
-            }else if ((System.currentTimeMillis() - startTime > 180000 )&
-                    (System.currentTimeMillis() - startTime <= 360000)){
-                Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, 3,random.nextInt(2,4));
-                if (!asteroid.collide(ship)) {
-                    asteroids.add(asteroid);
-                    pane.getChildren().add(asteroid.getShape());
-                }
-            //If the game lasts longer than 6 minutes, fastest moving asteroids will be created
-            }else {
-                Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, 6,3);
+        if (Math.random() < 0.003) {
+                Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, random.nextInt(1,4));
                 if (!asteroid.collide(ship)) {
                     asteroids.add(asteroid);
                     pane.getChildren().add(asteroid.getShape());
                 }
             }
-        }
     }
 
     private void createAliens(Pane pane) {
@@ -355,7 +347,7 @@ public class Main extends Application {
         });
     }
 
-    public void removeGroups(){
+    public void removeObjects(){
         //if a projectile and asteroid, both of them should be deleted from the projectiles and asteroids list, respectively.
         //remove all dead projectiles and asteroids from the window
         projectiles.stream()
@@ -433,7 +425,7 @@ public class Main extends Application {
         //If a larger asteroid is destroyed, then three smaller asteroids are created in the same place
         asteroids.addAll(createSmallerAsteroid());
         //delete the hit objects and the projectile
-        removeGroups();
+        removeObjects();
     }
 
     private ArrayList<Asteroid> createSmallerAsteroid() {
@@ -443,11 +435,10 @@ public class Main extends Application {
                 .forEach(asteroid -> {
                     if(asteroid.getSize() != 1){
                         int temp = 0;
-                        while (temp<3){
+                        while (temp<2){
                             Asteroid newAsteroid = new Asteroid(
                                     (int) asteroid.getShape().getTranslateX() + random.nextInt(-10,10),
                                     (int) asteroid.getShape().getTranslateY() + random.nextInt(-10,10),
-                                    asteroid.getSpeedTimes(),
                                     asteroid.getSize() - 1);
                             if(!newAsteroid.collide(ship)){
                                 smallerAsteroids.add(newAsteroid);
@@ -465,12 +456,24 @@ public class Main extends Application {
     }
 
     //make all asteroids can move
-    private void moveAsteroid() {
+    private void moveObjects() {
         asteroids.forEach(asteroid -> asteroid.move());
+        aliens.forEach(alien -> alien.move());
     }
 
-    private void moveAlien(){
-        aliens.forEach(alien -> alien.move());
+    private void changeLevel(){
+        asteroids.forEach(asteroid -> {
+            if (System.currentTimeMillis() - startTime >= 3000){
+                System.out.println("working");
+                asteroid.setSpeedTimes(asteroid.getSpeedTimes() + 2);
+            } else if ((System.currentTimeMillis() - startTime) >= 3000 &&
+                    (System.currentTimeMillis() - startTime <= 6000)) {
+                asteroid.setSpeedTimes(asteroid.getSpeedTimes() + 2);
+            }else {
+                asteroid.setSpeedTimes(asteroid.getSpeedTimes() + 2);
+            }
+            asteroid.setAccelerationAmount(asteroid.getSpeedTimes());
+        });
     }
 
     public static void main(String[] args) {
