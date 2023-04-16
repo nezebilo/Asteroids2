@@ -85,17 +85,6 @@ public class Asteroid extends FlyingObject {
         }
     }
 
-    public double getRotationalMovement() {
-        return rotationalMovement;
-    }
-
-    public void setRotationalMovement(double rotationalMovement) {
-        this.rotationalMovement = rotationalMovement;
-    }
-
-    public int getAccelerationAmount() {
-        return accelerationAmount;
-    }
 
     public void setAccelerationAmount(int accelerationAmount) {
         this.accelerationAmount = accelerationAmount;

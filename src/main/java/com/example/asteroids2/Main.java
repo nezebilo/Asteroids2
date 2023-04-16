@@ -31,8 +31,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.text.Font;
 
-
-
 public class Main extends Application {
     protected Pane pane;
 
@@ -69,13 +67,10 @@ public class Main extends Application {
 
     protected static final int SHIP_FIRE_INTERVAL = 500; // ms
     protected static final int ALIEN_FIRE_INTERVAL = 5000; // ms
-    protected static final int SHIP_THRUST_INTERVAL = 5000; // ms
+    protected static final int SHIP_THRUST_INTERVAL = 3000; // ms
     protected static final int SHIP_INVINCIBLE_TIME = 3000; // ms
-    protected static final int SHIP_PROJECTILE_EXIST_TIME = 5000;// ms
-    protected static final int ALIEN_PROJECTILE_EXIST_TIME = 5000;// ms
-
-
-
+    protected static final int SHIP_PROJECTILE_EXIST_TIME = 3000;// ms
+    protected static final int ALIEN_PROJECTILE_EXIST_TIME = 1000;// ms
 
     protected Random random = new Random();
 
@@ -94,38 +89,53 @@ public class Main extends Application {
 
     public Main() throws FileNotFoundException {
     }
-
-
-    /*
-     *暂停游戏
-     * 储存和获取最高分
-     * 优化menu/UI
-     */
+    
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-//         Load the background image
-        Image backgroundImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/imageAndFont/box.png")));
-        ImageView backgroundView = new ImageView(backgroundImg);
-        backgroundView.setFitWidth(400);
-        backgroundView.setFitHeight(300);
-
+        //Load the background image
+        ImageView backgroundView = getBackgroundView("/imageAndFont/box.png", 400, 300);
 
         // Create the "Start Game" button with the custom image
-        Button startBtn = new Button("Start Game");
-
-        startBtn.setFont(customFont);
+        Button startBtn = getStartButton(primaryStage);
 
         // Create the "Quit Game" button with the custom image
+        Button quitBtn = getQuitBtn(primaryStage);
+
+        // Create the main menu layout
+        VBox mainMenuLayout = new VBox(20, startBtn, quitBtn);
+        mainMenuLayout.setAlignment(Pos.CENTER);
+
+        // Create a StackPane to hold the background and menu layout
+        root = new StackPane();
+        root.getChildren().addAll(backgroundView, mainMenuLayout);
+
+        // Create the main menu scene
+        mainMenuScene = new Scene(root, 400, 300);
+        //stage > scene > pane
+        //game pane
+        primaryStage.setTitle("Game Title");
+        primaryStage.setScene(mainMenuScene);
+        primaryStage.show();
+
+        // Show high score on the main menu
+        Text highScoreText = new Text("Highest Score: " + getHighScore());
+        mainMenuLayout.getChildren().add(2, highScoreText);
+
+    }
+
+    private Button getQuitBtn(Stage primaryStage) {
         Button quitBtn = new Button("Quit Game");
         quitBtn.setFont(customFont);
+        quitBtn.setOnAction(e -> primaryStage.close());
+        return quitBtn;
+    }
 
-        // Create the "Start Game" button
-//        Button startBtn = new Button("Start Game");
+    private Button getStartButton(Stage primaryStage) {
+        Button startBtn = new Button("Start Game");
+        startBtn.setFont(customFont);
         startBtn.setOnAction(e -> {
-
             mainGameScene(primaryStage);
-
             AnimationTimer getAnimationTimer = getAnimationTimer(primaryStage);
             getAnimationTimer.start();
 
@@ -148,30 +158,15 @@ public class Main extends Application {
                 }
             });
         });
+        return startBtn;
+    }
 
-        // Create the "Quit Game" button
-        quitBtn.setOnAction(e -> primaryStage.close());
-
-        // Create the main menu layout
-        VBox mainMenuLayout = new VBox(20, startBtn, quitBtn);
-        mainMenuLayout.setAlignment(Pos.CENTER);
-
-        // Create a StackPane to hold the background and menu layout
-        root = new StackPane();
-        root.getChildren().addAll(backgroundView, mainMenuLayout);
-
-        // Create the main menu scene
-        mainMenuScene = new Scene(root, 400, 300);
-        //stage > scene > pane
-        //game pane
-        primaryStage.setTitle("Game Title");
-        primaryStage.setScene(mainMenuScene);
-        primaryStage.show();
-
-        // Show high score on the main menu
-        Text highScoreText = new Text("Highest Score: " + getHighScore());
-        mainMenuLayout.getChildren().add(2, highScoreText);
-
+    private ImageView getBackgroundView(String name, int v, int v1) {
+        Image backgroundImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream(name)));
+        ImageView backgroundView = new ImageView(backgroundImg);
+        backgroundView.setFitWidth(v);
+        backgroundView.setFitHeight(v1);
+        return backgroundView;
     }
 
     private  void mainGameScene(Stage primaryStage){
@@ -581,7 +576,7 @@ public class Main extends Application {
     }
 
     private void alienFire(){
-        //fire interval is 500 ms
+        //fire interval is 5000 ms
         if (System.currentTimeMillis() - alienLastFireTime > ALIEN_FIRE_INTERVAL) {
             alienLastFireTime = System.currentTimeMillis();
             aliens.forEach(alien -> {
@@ -739,22 +734,7 @@ public class Main extends Application {
         asteroids.forEach(asteroid -> asteroid.move());
         aliens.forEach(alien -> alien.move());
     }
-
-    private void changeLevel(){
-        asteroids.forEach(asteroid -> {
-            if (System.currentTimeMillis() - startTime >= 3000){
-                System.out.println("working");
-                asteroid.setSpeedTimes(asteroid.getSpeedTimes() + 2);
-            } else if ((System.currentTimeMillis() - startTime) >= 3000 &&
-                    (System.currentTimeMillis() - startTime <= 6000)) {
-                asteroid.setSpeedTimes(asteroid.getSpeedTimes() + 2);
-            }else {
-                asteroid.setSpeedTimes(asteroid.getSpeedTimes() + 2);
-            }
-            asteroid.setAccelerationAmount(asteroid.getSpeedTimes());
-        });
-    }
-
+     
     public static void main(String[] args) {
         launch(args);
     }
