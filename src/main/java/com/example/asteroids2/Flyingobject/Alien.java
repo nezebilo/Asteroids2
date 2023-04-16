@@ -5,7 +5,7 @@ import javafx.scene.shape.Polygon;
 import java.util.Random;
 
 public class Alien extends FlyingObject {
-    public Alien(int x, int y, int num) {
+    public Alien(int x, int y, int speedTimes) {
         super(new Polygon(-30.0, 0.0,
                 -8.0,-8.0,
                 -5.0,-12.0,
@@ -17,7 +17,7 @@ public class Alien extends FlyingObject {
                 -30.0,0.0), x, y);
 
         //control the speed of a created asteroid
-        getAccelerationAmount(num);
+        getAccelerationAmount(speedTimes);
     }
 
     public void getAccelerationAmount(int num) {
