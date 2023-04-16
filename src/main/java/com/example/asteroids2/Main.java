@@ -1,34 +1,37 @@
 package com.example.asteroids2;
 
+import com.example.asteroids2.Flyingobject.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import javafx.geometry.Pos;
 
-import javafx.scene.control.Button;
-import javafx.scene.layout.VBox;
-import javafx.scene.input.KeyEvent;
-
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-
-
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class  Main extends Application {
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.text.Font;
+
+
+
+public class Main extends Application {
     protected Pane pane;
 
     protected Scene scene;
-    protected Scene mainMenuScene;
 
     protected double startTime;
 
@@ -58,18 +61,52 @@ public class  Main extends Application {
 
     protected Random random = new Random();
 
-
-
+    protected Scene mainMenuScene;
     private Pane pauseMenuPane;
+
+    private StackPane pauseMenuContainer;
+
+    private StackPane gameOverContainer;
     private boolean isPaused = false;
 
+    private StackPane root;
+
+    // Load the custom font
+    Font customFont = Font.loadFont(new FileInputStream("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
+
+    public Main() throws FileNotFoundException {
+    }
 
 
-
+    /*
+     *暂停游戏
+     * 飞船大小和速度成反比
+     * 减速
+     * 储存和获取最高分
+     * 优化menu/UI
+     * 改变游戏难度
+     */
+    @Override
     public void start(Stage primaryStage) throws Exception {
 
-        // Create the "Start Game" button
+//         Load the background image
+        Image backgroundImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/imageAndFont/box.png")));
+        ImageView backgroundView = new ImageView(backgroundImg);
+        backgroundView.setFitWidth(400);
+        backgroundView.setFitHeight(300);
+
+
+        // Create the "Start Game" button with the custom image
         Button startBtn = new Button("Start Game");
+
+        startBtn.setFont(customFont);
+
+        // Create the "Quit Game" button with the custom image
+        Button quitBtn = new Button("Quit Game");
+        quitBtn.setFont(customFont);
+
+        // Create the "Start Game" button
+//        Button startBtn = new Button("Start Game");
         startBtn.setOnAction(e -> {
 
             mainGameScene(primaryStage);
@@ -89,6 +126,7 @@ public class  Main extends Application {
                         showPauseMenu(primaryStage, getAnimationTimer);
                     } else {
                         pane.getChildren().remove(pauseMenuPane);
+                        pane.getChildren().remove(pauseMenuContainer);
                         isPaused = false;
                         getAnimationTimer.start();
                     }
@@ -97,15 +135,18 @@ public class  Main extends Application {
         });
 
         // Create the "Quit Game" button
-        Button quitBtn = new Button("Quit Game");
         quitBtn.setOnAction(e -> primaryStage.close());
 
         // Create the main menu layout
         VBox mainMenuLayout = new VBox(20, startBtn, quitBtn);
         mainMenuLayout.setAlignment(Pos.CENTER);
 
+        // Create a StackPane to hold the background and menu layout
+        root = new StackPane();
+        root.getChildren().addAll(backgroundView, mainMenuLayout);
+
         // Create the main menu scene
-        mainMenuScene = new Scene(mainMenuLayout, 400, 300);
+        mainMenuScene = new Scene(root, 400, 300);
         //stage > scene > pane
         //game pane
         primaryStage.setTitle("Game Title");
@@ -119,6 +160,12 @@ public class  Main extends Application {
     }
 
     private  void mainGameScene(Stage primaryStage){
+        Image backgroundImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/imageAndFont/mainGameBackground.jpg")));
+        ImageView backgroundView = new ImageView(backgroundImg);
+        backgroundView.setFitWidth(WIDTH);
+        backgroundView.setFitHeight(HEIGHT);
+
+
         // Code to start the game goes here
         pane = new Pane();
         pane.setPrefSize(WIDTH, HEIGHT);
@@ -130,21 +177,41 @@ public class  Main extends Application {
         //add roles to pane
         addRoles(pane);
         //game scene
-        scene = new Scene(pane);
+        // Create a StackPane to hold the background and game pane
+        root = new StackPane();
+        root.getChildren().addAll(backgroundView, pane);
+
+        scene = new Scene(root);
         primaryStage.setTitle("Asteroids Game");
         primaryStage.setScene(scene);
 
     }
     private void showPauseMenu(Stage primaryStage, AnimationTimer getAnimationTimer) {
+
+        Image backgroundImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/imageAndFont/box.png")));
+        ImageView backgroundView = new ImageView(backgroundImg);
+        backgroundView.setFitWidth(300);
+        backgroundView.setFitHeight(200);
+
         pauseMenuPane = new Pane();
-        pauseMenuPane.setPrefSize(200, 100);
+        pauseMenuPane.setPrefSize(300, 200);
         pauseMenuPane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7); -fx-border-color: white; -fx-border-width: 2;");
         pauseMenuPane.setLayoutX((pane.getPrefWidth() - pauseMenuPane.getPrefWidth()) / 2);
         pauseMenuPane.setLayoutY((pane.getPrefHeight() - pauseMenuPane.getPrefHeight()) / 2);
 
+        // Create a StackPane to hold the background and pause menu pane
+        pauseMenuContainer = new StackPane();
+        pauseMenuContainer.getChildren().addAll(backgroundView, pauseMenuPane);
+        pauseMenuContainer.setLayoutX(pauseMenuPane.getLayoutX());
+        pauseMenuContainer.setLayoutY(pauseMenuPane.getLayoutY());
+
+        pane.getChildren().add(pauseMenuContainer);
+
         Button resumeBtn = new Button("Resume Game");
+        resumeBtn.setFont(customFont);
         resumeBtn.setOnAction(e -> {
             pane.getChildren().remove(pauseMenuPane);
+            pane.getChildren().remove(pauseMenuContainer);
             isPaused = false;
             getAnimationTimer.start();
         });
@@ -154,6 +221,8 @@ public class  Main extends Application {
         pauseMenuPane.getChildren().add(resumeBtn);
 
         Button quitGameBtn = new Button("Quit Game");
+        quitGameBtn.setFont(customFont);
+
         quitGameBtn.setOnAction(e -> {
             primaryStage.close();
         });
@@ -163,6 +232,8 @@ public class  Main extends Application {
         pauseMenuPane.getChildren().add(quitGameBtn);
 
         pane.getChildren().add(pauseMenuPane);
+
+
     }
 
     private int getHighScore() {
@@ -171,6 +242,12 @@ public class  Main extends Application {
     }
 
     private void gameOver(Stage primaryStage, AnimationTimer animationTimer) {
+
+        Image backgroundImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/imageAndFont/box.png")));
+        ImageView backgroundView = new ImageView(backgroundImg);
+        backgroundView.setFitWidth(350);
+        backgroundView.setFitHeight(250);
+
         // Stop the animation timer
         animationTimer.stop();
 
@@ -179,15 +256,26 @@ public class  Main extends Application {
 
         // Create the game over pane
         Pane gameOverPane = new Pane();
-        gameOverPane.setPrefSize(300, 200);
+
+        gameOverPane.setPrefSize(350, 250);
         gameOverPane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7); -fx-border-color: white; -fx-border-width: 2;");
         gameOverPane.setLayoutX((pane.getPrefWidth() - gameOverPane.getPrefWidth()) / 2);
         gameOverPane.setLayoutY((pane.getPrefHeight() - gameOverPane.getPrefHeight()) / 2);
 
+        // Create a StackPane to hold the background and pause menu pane
+        gameOverContainer = new StackPane();
+        gameOverContainer.getChildren().addAll(backgroundView, gameOverPane);
+        gameOverContainer.setLayoutX(gameOverPane.getLayoutX());
+        gameOverContainer.setLayoutY(gameOverPane.getLayoutY());
+
+        pane.getChildren().add(gameOverContainer);
+
         // Create the "Restart" button
         Button restartBtn = new Button("Restart");
+        restartBtn.setFont(customFont);
         restartBtn.setOnAction(e -> {
             pane.getChildren().remove(gameOverPane);
+            pane.getChildren().remove(gameOverContainer);
             startNewGame(primaryStage);
         });
         restartBtn.setLayoutX(80);
@@ -195,6 +283,7 @@ public class  Main extends Application {
 
         // Create the "Back to Main Menu" button
         Button mainMenuBtn = new Button("Back to Main Menu");
+        mainMenuBtn.setFont(customFont);
         mainMenuBtn.setOnAction(e -> {
             pane.getChildren().remove(gameOverPane);
             primaryStage.setScene(mainMenuScene);
@@ -208,6 +297,8 @@ public class  Main extends Application {
 
         // Add the game over pane to the game pane
         pane.getChildren().add(gameOverPane);
+
+
     }
 
     private void startNewGame(Stage primaryStage) {
@@ -230,14 +321,6 @@ public class  Main extends Application {
     }
 
 
-
-
-
-
-
-
-
-
     private AnimationTimer getAnimationTimer(Stage primaryStage) {
         return new AnimationTimer() {
 
@@ -255,9 +338,10 @@ public class  Main extends Application {
                 fire();
                 alienFire();
                 collision(primaryStage, this);
-                moveAsteroid();
-                moveAlien();
+                moveObjects();
                 removeProjectiles();
+
+                changeLevel();
 
                 //Once a collision occurs, game stops
                 asteroids.forEach(asteroid -> {
@@ -282,7 +366,7 @@ public class  Main extends Application {
         };
     }
 
-    private void checkCollisionOfShip(Group obj, Stage primaryStage, AnimationTimer getAnimationTimer) throws Exception {
+    private void checkCollisionOfShip(FlyingObject obj, Stage primaryStage, AnimationTimer getAnimationTimer) throws Exception {
         if (ship.collide(obj) && ship.getNumOfDeath() > 2 && !ship.isInvincibility()) {
             gameOver(primaryStage, getAnimationTimer);
         } else if (ship.collide(obj) && !ship.isInvincibility()) {
@@ -305,7 +389,9 @@ public class  Main extends Application {
     private void checkInvincibility(){
         if ((System.currentTimeMillis() - lastDestroyedTime > 3000)){
             ship.setInvincibility(false);
-            ship.getShape().setFill(Color.web("#000000"));
+            ship.getShape().setFill(Color.web("#ffffff"));
+            String filename = "/imageAndFont/DurrrSpaceShip-opengameart-50x50.png";
+            ship.setImage(filename);
         }
     }
 
@@ -320,7 +406,7 @@ public class  Main extends Application {
         //create some lowest moving asteroids when a new game starts
         Random rnd = new Random();
         for (int i = 0; i < 5; i++) {
-            Asteroid asteroid = new Asteroid(rnd.nextInt(WIDTH), rnd.nextInt(HEIGHT),1,1);
+            Asteroid asteroid = new Asteroid(rnd.nextInt(WIDTH), rnd.nextInt(HEIGHT),3);
             //This shows that the newly generated asteroid will not be too close to the ship
             if (!asteroid.collide(ship)) {
                 asteroids.add(asteroid);
@@ -331,29 +417,11 @@ public class  Main extends Application {
 
     private void createAsteroids(Pane pane) {
         //if a random number is less 0.005, a new asteroids will be added to the window.
-        if (Math.random() < 0.005) {
-            //If the game lasts less than 3 minutes, slower moving asteroids will be created
-            if (System.currentTimeMillis() - startTime <= 180000) {
-                Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, 1, random.nextInt(1,3));
-                if (!asteroid.collide(ship)) {
-                    asteroids.add(asteroid);
-                    pane.getChildren().add(asteroid.getShape());
-                }
-                //If the game lasts longer than 3 minutes, faster moving asteroids will be created
-            }else if ((System.currentTimeMillis() - startTime > 180000 )&
-                    (System.currentTimeMillis() - startTime <= 360000)){
-                Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, 3,random.nextInt(2,4));
-                if (!asteroid.collide(ship)) {
-                    asteroids.add(asteroid);
-                    pane.getChildren().add(asteroid.getShape());
-                }
-                //If the game lasts longer than 6 minutes, fastest moving asteroids will be created
-            }else {
-                Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, 6,3);
-                if (!asteroid.collide(ship)) {
-                    asteroids.add(asteroid);
-                    pane.getChildren().add(asteroid.getShape());
-                }
+        if (Math.random() < 0.003) {
+            Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, random.nextInt(1,4));
+            if (!asteroid.collide(ship)) {
+                asteroids.add(asteroid);
+                pane.getChildren().add(asteroid.getShape());
             }
         }
     }
@@ -520,7 +588,7 @@ public class  Main extends Application {
         });
     }
 
-    public void removeGroups(){
+    public void removeObjects(){
         //if a projectile and asteroid, both of them should be deleted from the projectiles and asteroids list, respectively.
         //remove all dead projectiles and asteroids from the window
         projectiles.stream()
@@ -598,7 +666,7 @@ public class  Main extends Application {
         //If a larger asteroid is destroyed, then three smaller asteroids are created in the same place
         asteroids.addAll(createSmallerAsteroid());
         //delete the hit objects and the projectile
-        removeGroups();
+        removeObjects();
     }
 
     private ArrayList<Asteroid> createSmallerAsteroid() {
@@ -608,11 +676,10 @@ public class  Main extends Application {
                 .forEach(asteroid -> {
                     if(asteroid.getSize() != 1){
                         int temp = 0;
-                        while (temp<3){
+                        while (temp<2){
                             Asteroid newAsteroid = new Asteroid(
                                     (int) asteroid.getShape().getTranslateX() + random.nextInt(-10,10),
                                     (int) asteroid.getShape().getTranslateY() + random.nextInt(-10,10),
-                                    asteroid.getSpeedTimes(),
                                     asteroid.getSize() - 1);
                             if(!newAsteroid.collide(ship)){
                                 smallerAsteroids.add(newAsteroid);
@@ -630,12 +697,24 @@ public class  Main extends Application {
     }
 
     //make all asteroids can move
-    private void moveAsteroid() {
+    private void moveObjects() {
         asteroids.forEach(asteroid -> asteroid.move());
+        aliens.forEach(alien -> alien.move());
     }
 
-    private void moveAlien(){
-        aliens.forEach(alien -> alien.move());
+    private void changeLevel(){
+        asteroids.forEach(asteroid -> {
+            if (System.currentTimeMillis() - startTime >= 3000){
+                System.out.println("working");
+                asteroid.setSpeedTimes(asteroid.getSpeedTimes() + 2);
+            } else if ((System.currentTimeMillis() - startTime) >= 3000 &&
+                    (System.currentTimeMillis() - startTime <= 6000)) {
+                asteroid.setSpeedTimes(asteroid.getSpeedTimes() + 2);
+            }else {
+                asteroid.setSpeedTimes(asteroid.getSpeedTimes() + 2);
+            }
+            asteroid.setAccelerationAmount(asteroid.getSpeedTimes());
+        });
     }
 
     public static void main(String[] args) {
