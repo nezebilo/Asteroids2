@@ -3,33 +3,30 @@ package com.example.asteroids2;
 import com.example.asteroids2.Flyingobject.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.geometry.Pos;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.example.asteroids2.ConstantVar.Level.*;
 import static com.example.asteroids2.ConstantVar.Size.*;
 import static com.example.asteroids2.ConstantVar.SpeedRate.*;
-import static com.example.asteroids2.ConstantVar.Level.*;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.text.Font;
 
 public class Main extends Application {
     protected Pane pane;
@@ -50,12 +47,8 @@ public class Main extends Application {
     protected List<Asteroid> asteroids = new ArrayList<>();
 
     protected List<Alien> aliens = new ArrayList<>();
-
     protected List<Projectile> projectiles = new ArrayList<>();
-
-
     protected List<Projectile> alienProjectiles = new ArrayList<>();
-
 
     //record the last firing time, to control firing frequency
     protected double lastFireTime;
@@ -71,6 +64,10 @@ public class Main extends Application {
     protected static final int SHIP_INVINCIBLE_TIME = 3000; // ms
     protected static final int SHIP_PROJECTILE_EXIST_TIME = 3000;// ms
     protected static final int ALIEN_PROJECTILE_EXIST_TIME = 1000;// ms
+    protected static final int ALIEN_EXISTING_MAXIMUM = 3;
+    protected static final int SHIP_PROJECTILE_EXIST_MAXIMUM = 5;
+    protected static final double CREATED_PROBABILITY = 0.001;
+
 
     protected Random random = new Random();
 
@@ -89,7 +86,7 @@ public class Main extends Application {
 
     public Main() throws FileNotFoundException {
     }
-    
+
     @Override
     public void start(Stage primaryStage) throws Exception {
 
@@ -117,6 +114,7 @@ public class Main extends Application {
         primaryStage.setTitle("Game Title");
         primaryStage.setScene(mainMenuScene);
         primaryStage.show();
+
 
         // Show high score on the main menu
         Text highScoreText = new Text("Highest Score: " + getHighScore());
@@ -247,8 +245,7 @@ public class Main extends Application {
     }
 
     private int getHighScore() {
-
-        return 0;
+        return points;
     }
 
     private void gameOver(Stage primaryStage, AnimationTimer animationTimer) {
@@ -262,7 +259,7 @@ public class Main extends Application {
         animationTimer.stop();
 
         // Record the score
-        recordScore();
+//        recordScore();
 
         // Create the game over pane
         Pane gameOverPane = new Pane();
@@ -318,7 +315,7 @@ public class Main extends Application {
         projectiles = new ArrayList<>();
         alienProjectiles = new ArrayList<>();
         points = 0;
-        ship.setNumOfDeath(0);
+        ship.setLives(3);
 
         // Start the game
         mainGameScene(primaryStage);
@@ -326,8 +323,19 @@ public class Main extends Application {
         getAnimationTimer.start();;
     }
 
-    private void recordScore() {
+    private void recordScore()  {
         // Implement the logic to record the player's score
+        try {
+            File file = new File("src/main/java/com/example/asteroids2/highScores.txt");
+            FileWriter writer = new FileWriter(file);
+            //save username
+
+            //save score of current user
+            writer.write(points);
+        }catch (IOException e){
+            System.out.println("File is not found");
+        }
+
     }
 
 
@@ -376,7 +384,7 @@ public class Main extends Application {
 }
 
     private void checkCollisionOfShip(FlyingObject obj, Stage primaryStage, AnimationTimer getAnimationTimer) throws Exception {
-        if (ship.collide(obj) && ship.getNumOfDeath() > 2 && !ship.isInvincibility()) {
+        if (ship.collide(obj) && ship.getLives() == 0 && !ship.isInvincibility()) {
             gameOver(primaryStage, getAnimationTimer);
         } else if (ship.collide(obj) && !ship.isInvincibility()) {
             lastDestroyedTime = System.currentTimeMillis();
@@ -384,11 +392,11 @@ public class Main extends Application {
             obj.setIsALive(false);
             pane.getChildren().remove(ship.getShape());
             //increase the number of death
-            int temp = ship.getNumOfDeath() + 1;
+            int temp = ship.getLives() - 1;
             //change the location ship in the center of window
             ship = new Ship(WIDTH / 2, HEIGHT / 2);
             ship.setInvincibility(true);
-            ship.setNumOfDeath(temp);
+            ship.setLives(temp);
             //Change the colour of the reborn ship
             ship.getShape().setFill(Color.web("#FF0000"));
             pane.getChildren().add(ship.getShape());
@@ -424,7 +432,7 @@ public class Main extends Application {
 
     private void createAsteroids(Pane pane) {
         //if a random number is less 0.005, a new asteroids will be added to the window.
-        if (Math.random() < 0.001) {
+        if (Math.random() < CREATED_PROBABILITY) {
             if ((System.currentTimeMillis() - startTime) <= EASY.setLevel()) {
                 Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, LARGE.setSize(), LOWER.setSpeedRate());
                 if (!asteroid.collide(ship)) {
@@ -451,7 +459,7 @@ public class Main extends Application {
 
     private void createAliens(Pane pane) {
         //if a random number is less 0.005, a new aliens will be added to the window.
-        if (Math.random() < 0.001) {
+        if (Math.random() < CREATED_PROBABILITY && (aliens.size() <= ALIEN_EXISTING_MAXIMUM)) {
             if (((System.currentTimeMillis() - startTime) > MODERATE.setLevel()) &
                     ((System.currentTimeMillis() - startTime) <= HARD.setLevel())) {
                 Alien alien = new Alien(WIDTH, HEIGHT,1);
@@ -556,7 +564,7 @@ public class Main extends Application {
 
     private void fire() {
         //only 10 projectiles exist at the same time
-        if (pressedKeys.getOrDefault(KeyCode.SPACE, false) && projectiles.size() < 10) {
+        if (pressedKeys.getOrDefault(KeyCode.SPACE, false) && projectiles.size() < SHIP_PROJECTILE_EXIST_MAXIMUM) {
             //fire interval is 500 ms
             if (System.currentTimeMillis() - lastFireTime > SHIP_FIRE_INTERVAL) {
                 lastFireTime = System.currentTimeMillis();
@@ -636,7 +644,13 @@ public class Main extends Application {
                     pane.getChildren().remove(asteroid.getShape());
                     //For each asteroid destroyed, the player gains ten points
                     //bonus score can be set up in 'addAndGet' by change the parameter.
-                    points += 10;
+                    if (asteroid.getSize() == SMALL.setSize()){
+                        points += 250;
+                    } else if (asteroid.getSize() == MEDIUM.setSize()) {
+                        points += 500;
+                    }else if(asteroid.getSize() == LARGE.setSize()){
+                        points += 1000;
+                    }
                     score.setText("Score: " + getAtomicInteger().addAndGet(points));
                 });
         aliens.stream()
@@ -668,8 +682,8 @@ public class Main extends Application {
             asteroids.forEach(asteroid -> {
                 if (projectile.collide(asteroid)) {
                     //record the number of death of each object
-                    projectile.setNumOfDeath(1);
-                    asteroid.setNumOfDeath(1);
+                    projectile.setLives(0);
+                    asteroid.setLives(0);
                     //set the status of objects which occurs collision is false
                     //it mean that the status objects marked as false should be deleted
                     projectile.setIsALive(false);
@@ -679,8 +693,8 @@ public class Main extends Application {
             //check projectiles and aliens
             aliens.forEach(alien -> {
                 if (projectile.collide(alien)){
-                    projectile.setNumOfDeath(1);
-                    alien.setNumOfDeath(1);
+                    projectile.setLives(0);
+                    alien.setLives(0);
                     //set the status of objects which occurs collision is false
                     //it mean that the status objects marked as false should be deleted
                     projectile.setIsALive(false);
@@ -707,7 +721,7 @@ public class Main extends Application {
         asteroids.stream()
                 .filter(asteroid -> !asteroid.getIsALive())
                 .forEach(asteroid -> {
-                    if(asteroid.getSize() != 1){
+                    if(asteroid.getSize() != SMALL.setSize()){
                         int temp = 0;
                         while (temp<2){
                             Asteroid newAsteroid = new Asteroid(
@@ -734,7 +748,7 @@ public class Main extends Application {
         asteroids.forEach(asteroid -> asteroid.move());
         aliens.forEach(alien -> alien.move());
     }
-     
+
     public static void main(String[] args) {
         launch(args);
     }

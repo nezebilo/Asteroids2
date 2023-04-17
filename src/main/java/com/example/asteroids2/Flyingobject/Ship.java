@@ -15,6 +15,7 @@ public class Ship extends FlyingObject {
         //In a game, players have two chances to revive.
         this.setRotate();
         this.invincibility = false;
+        this.setLives(3);
     }
 
     public void setRotate(){

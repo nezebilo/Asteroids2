@@ -11,7 +11,7 @@ public abstract class FlyingObject {
     protected Point2D movement;
     protected boolean isAlive;
 
-    protected int numOfDeath;
+    protected int lives;
 
     protected double createTime;
 
@@ -22,7 +22,7 @@ public abstract class FlyingObject {
         //default isAlive is true.
         this.isAlive = true;
         //it means that once the object is destroyed, the numOfDeath of object will plus 1.
-        this.numOfDeath = 0;
+        this.lives = 1;
         this.movement = new Point2D(0, 0);
         this.createTime = System.currentTimeMillis();
         this.getShape().setFill(Color.WHITE);
@@ -92,12 +92,12 @@ public abstract class FlyingObject {
         return collisionArea.getBoundsInLocal().getWidth() != -1;
     }
 
-    public int getNumOfDeath() {
-        return numOfDeath;
+    public int getLives() {
+        return lives;
     }
 
-    public void setNumOfDeath(int numOfDeath) {
-        this.numOfDeath = numOfDeath;
+    public void setLives(int lives) {
+        this.lives = lives;
     }
 
     public double getCreateTime() {
