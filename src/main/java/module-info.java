@@ -3,6 +3,7 @@ module com.example.asteroids2 {
     requires javafx.fxml;
 
     requires com.almasb.fxgl.all;
+    requires annotations;
 
     opens com.example.asteroids2 to javafx.fxml;
     exports com.example.asteroids2;
