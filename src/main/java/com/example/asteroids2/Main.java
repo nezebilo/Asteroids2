@@ -143,11 +143,10 @@ public class Main extends Application {
         ImageView highScoreBg = ButtonMenu.getBackgroundView("/imageAndFont/mainGameBackground.jpg", 400, 300);
 
         Pane highscorePane = new Pane();
+
         highScoreContainer = new StackPane();
 
-        highScoreContainer.getChildren().addAll(highScoreBg, highscorePane);
-        highScoreContainer.setLayoutX(highscorePane.getLayoutX());
-        highScoreContainer.setLayoutY(highscorePane.getLayoutY());
+        containerSet(highScoreContainer, highScoreBg, highscorePane);
 
         root.getChildren().add(highScoreContainer);
 
@@ -180,6 +179,12 @@ public class Main extends Application {
 
     }
 
+    private void containerSet(StackPane container, ImageView imgBg, Pane pane) {
+        container.getChildren().addAll(imgBg, pane);
+        container.setLayoutX(pane.getLayoutX());
+        container.setLayoutY(pane.getLayoutY());
+    }
+
 
     private Pane getPane(ImageView backgroundView) {
         Pane gameOverPane = new Pane();
@@ -191,9 +196,7 @@ public class Main extends Application {
 
         // Create a StackPane to hold the background and pause menu pane
         gameOverContainer = new StackPane();
-        gameOverContainer.getChildren().addAll(backgroundView, gameOverPane);
-        gameOverContainer.setLayoutX(gameOverPane.getLayoutX());
-        gameOverContainer.setLayoutY(gameOverPane.getLayoutY());
+        containerSet(gameOverContainer, backgroundView, gameOverPane);
 
         pane.getChildren().add(gameOverContainer);
         return gameOverPane;
@@ -292,9 +295,7 @@ public class Main extends Application {
 
         // Create a StackPane to hold the background and pause menu pane
         pauseMenuContainer = new StackPane();
-        pauseMenuContainer.getChildren().addAll(backgroundView, pauseMenuPane);
-        pauseMenuContainer.setLayoutX(pauseMenuPane.getLayoutX());
-        pauseMenuContainer.setLayoutY(pauseMenuPane.getLayoutY());
+        containerSet(pauseMenuContainer, backgroundView, pauseMenuPane);
 
         pane.getChildren().add(pauseMenuContainer);
 
