@@ -114,6 +114,7 @@ public class Main extends Application {
         // Create the "Quit Game" button with the custom image
         Button quitBtn = ButtonMenu.getQuitBtn(primaryStage, customFont);
 
+        // Create the "Quit Game" button
         Button highScoreBtn = new Button("High Score List");
         highScoreBtn.setFont(customFont);
 
