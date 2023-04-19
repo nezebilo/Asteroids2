@@ -1,13 +1,19 @@
 package com.example.asteroids2;
 
 import com.example.asteroids2.Flyingobject.*;
+import com.example.asteroids2.MenuUi.ButtonMenu;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.image.Image;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -16,8 +22,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -242,15 +248,6 @@ public class Main extends Application {
         //add roles to pane
         addRoles(pane);
 
-        //
-        score = new Text(" ");
-
-        // Create the score display box for the game scene
-        attributeBox("Score: ", "20", 10, 10);
-        attributeBox(" Level: ", "20",10, 30);
-        attributeBox(" L i f e: ", "20",10, 50);
-
-        //game scene
         // Create a StackPane to hold the background and game pane
         root = new StackPane();
         root.getChildren().addAll(backgroundView, pane);
@@ -324,7 +321,6 @@ public class Main extends Application {
     }
 
     private int getHighScore() {
-        return 0;
         return points;
     }
 
@@ -441,35 +437,44 @@ public class Main extends Application {
                 controlShip();
                 checkInvincibility();
 
-            fire();
-            alienFire();
-            collision(primaryStage, this);
-            moveObjects();
-            removeProjectiles();
+                fire();
+                alienFire();
+                collision(primaryStage, this);
+                moveObjects();
+                removeProjectiles();
+
+                showGameInfo();
 
 
-            //Once a collision occurs, game stops
-            asteroids.forEach(asteroid -> {
-                //When a collision occurs，
-                //if the number of deaths of the ship is already greater than or equal to 3, the game will stop.
-                //On the contrary, recreate ship in the center of window
-                try {
-                    checkCollisionOfShip(asteroid, primaryStage, this);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+                //Once a collision occurs, game stops
+                asteroids.forEach(asteroid -> {
+                    //When a collision occurs，
+                    //if the number of deaths of the ship is already greater than or equal to 3, the game will stop.
+                    //On the contrary, recreate ship in the center of window
+                    try {
+                        checkCollisionOfShip(asteroid, primaryStage, this);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
-            aliens.forEach(alien -> {
-                try {
-                   checkCollisionOfShip(alien, primaryStage, this);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
-    };
+                aliens.forEach(alien -> {
+                    try {
+                       checkCollisionOfShip(alien, primaryStage, this);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        };
 }
+
+    private void showGameInfo() {
+        // Create the score display box for the game scene
+        attributeBox("Score: ", String.valueOf(points), 10, 10);
+        attributeBox(" Level: ", "1",10, 30);
+        attributeBox(" Life: ", "3",10, 50);
+    }
 
     private void checkCollisionOfShip(FlyingObject obj, Stage primaryStage, AnimationTimer getAnimationTimer) throws Exception {
         if (ship.collide(obj) && ship.getLives() == 0 && !ship.isInvincibility()) {
@@ -739,14 +744,12 @@ public class Main extends Application {
                     }else if(asteroid.getSize() == LARGE.setSize()){
                         points += 1000;
                     }
-                    score.setText("Score: " + getAtomicInteger().addAndGet(points));
                 });
         aliens.stream()
                 .filter(alien -> !alien.getIsALive())
                 .forEach(alien -> {
                     pane.getChildren().remove(alien.getShape());
-                    points += 20;
-                    score.setText("Score: " + getAtomicInteger().addAndGet(points));
+                    points += 2000;
                 });
         //Remove all projectiles and asteroids that collide
         projectiles.removeAll(projectiles.stream()

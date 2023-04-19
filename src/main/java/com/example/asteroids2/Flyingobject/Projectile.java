@@ -14,8 +14,6 @@ public class Projectile extends FlyingObject {
         changeX *= 10;
         changeY *= 10;
 
-        this.createTime = System.currentTimeMillis();
-
         this.movement = this.movement.add(changeX, changeY);
     }
 }

@@ -21,7 +21,7 @@ public abstract class FlyingObject {
         this.shape.setTranslateY(y);
         //default isAlive is true.
         this.isAlive = true;
-        //it means that once the object is destroyed, the numOfDeath of object will plus 1.
+        //it means that once the object is destroyed, the lives of object will reduce 1.
         this.lives = 1;
         this.movement = new Point2D(0, 0);
         this.createTime = System.currentTimeMillis();

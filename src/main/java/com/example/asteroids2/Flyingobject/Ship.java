@@ -1,11 +1,7 @@
 package com.example.asteroids2.Flyingobject;
 
-import javafx.scene.input.KeyCode;
 import javafx.scene.shape.Polygon;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class Ship extends FlyingObject {
     protected boolean invincibility;
