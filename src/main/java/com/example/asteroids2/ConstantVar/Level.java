@@ -14,4 +14,5 @@ public enum Level {
     public int setLevel(){
         return level;
     }
+
 }

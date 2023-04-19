@@ -7,17 +7,16 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -95,6 +94,9 @@ public class Main extends Application {
     private boolean isPaused = false;
 
     private StackPane root;
+    private Label infoLabel;
+
+    private String[][] scores;
 
     // Load the custom font
     Font customFont = Font.loadFont(new FileInputStream("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
@@ -133,16 +135,16 @@ public class Main extends Application {
         primaryStage.setScene(mainMenuScene);
         primaryStage.show();
 
-
-        // Show high score on the main menu
-        Text highScoreText = new Text("Highest Score: " + getHighScore());
-        mainMenuLayout.getChildren().add(2, highScoreText);
         highScoreBtn.setOnAction(e -> {
-            highScoreMenu();
+            try {
+                highScoreMenu();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         });
     }
 
-    private void highScoreMenu() {
+    private void highScoreMenu() throws IOException {
         // Create the game over pane
         ImageView highScoreBg = ButtonMenu.getBackgroundView("/imageAndFont/mainGameBackground.jpg", 400, 300);
 
@@ -163,14 +165,20 @@ public class Main extends Application {
         // Create a ListView to display the high scores
         ListView<String> highScoreListView = new ListView<>();
 
+        // Read the file
+        readFile();
+
+        // sort the scores
+        sortTheScores();
+
+        // List
+        List<String> scoresList = new ArrayList<>();
+        for(int i = 0; i <5; i++){
+            scoresList.add("No."+(i+1) + "-" +scores[i][0] +"-"+ scores[i][1]);
+        }
+
         // Add some test high scores to the list
-        ObservableList<String> highScores = FXCollections.observableArrayList(
-                "1. Player 1 - 1000",
-                "2. Player 2 - 750",
-                "3. Player 3 - 500",
-                "4. Player 4 - 250",
-                "5. Player 5 - 100"
-        );
+        ObservableList<String> highScores = FXCollections.observableArrayList(scoresList);
 
         highScoreListView.setItems(highScores);
 
@@ -181,6 +189,29 @@ public class Main extends Application {
 
         highscorePane.getChildren().add(highScoreListView);
 
+    }
+
+    private void sortTheScores() {
+        Arrays.sort(scores, new Comparator<String[]>() {
+            @Override
+            public int compare(String[] o1, String[] o2) {
+                return Integer.parseInt(o2[1])-Integer.parseInt(o1[1]);
+            }
+        });
+    }
+
+    private void readFile() throws IOException {
+        FileReader highScoreFile = new FileReader("src/main/java/com/example/asteroids2/highScores.txt");
+        BufferedReader bufferedReader = new BufferedReader(highScoreFile);
+        String line;
+        while ((line = bufferedReader.readLine())!= null){
+            String[] tokens = line.split(" ");
+            scores = new String[tokens.length / 2][2];
+            for( int i = 0, j= 0; i < tokens.length; i += 2, j++){
+                scores[j][0] = tokens[i];
+                scores[j][1] = tokens[i+1];
+            }
+        }
     }
 
     private void containerSet(StackPane container, ImageView imgBg, Pane pane) {
@@ -252,31 +283,19 @@ public class Main extends Application {
         root = new StackPane();
         root.getChildren().addAll(backgroundView, pane);
 
+        infoLabel = new Label("Score: "+ points +"  \nLife: 3  \nLevel: 1");
+        // Set the font color to white
+        infoLabel.setTextFill(Color.WHITE);
+        infoLabel.setFont(customFont);
+
+        pane.getChildren().add(infoLabel);
+
 
         scene = new Scene(root);
         primaryStage.setTitle("Asteroids Game");
         primaryStage.setScene(scene);
     }
 
-    private void attributeBox(String title, String values, int x, int y) {
-        HBox attriBox = new HBox();
-        attriBox.setPadding(new Insets(10));
-        attriBox.setAlignment(Pos.CENTER_LEFT);
-        attriBox.setTranslateX(x);
-        attriBox.setTranslateY(y);
-
-        Text attriLabel = new Text(title);
-        attriLabel.setFont(customFont);
-        attriLabel.setFill(Color.WHITE);
-
-        Text attriValue = new Text(values);
-        attriValue.setFont(customFont);
-        attriValue.setFill(Color.WHITE);
-
-        // Add the score display box to the pane
-        attriBox.getChildren().addAll(attriLabel, attriValue);
-        pane.getChildren().add(attriBox);
-    }
 
     private void showPauseMenu(Stage primaryStage, AnimationTimer getAnimationTimer) {
 
@@ -331,9 +350,6 @@ public class Main extends Application {
         // Stop the animation timer
         animationTimer.stop();
 
-        // Record the score
-//        recordScore();
-
         // Create the game over pane
         Pane gameOverPane = getPane(backgroundView);
 
@@ -372,7 +388,7 @@ public class Main extends Application {
             if (result.isPresent()) {
                 String name = result.get();
                 // record the score with the name
-                // recordScore(name, points);
+                 recordNameScore(name);
             }
         });
 
@@ -401,6 +417,7 @@ public class Main extends Application {
         alienProjectiles = new ArrayList<>();
         points = 0;
         ship.setLives(3);
+//        ship.setMovement(new Point2D(0, 0));
 
         // Start the game
         mainGameScene(primaryStage);
@@ -408,19 +425,18 @@ public class Main extends Application {
         getAnimationTimer.start();;
     }
 
-    private void recordScore()  {
+
+    private void recordNameScore(String name) {
         // Implement the logic to record the player's score
         try {
             File file = new File("src/main/java/com/example/asteroids2/highScores.txt");
-            FileWriter writer = new FileWriter(file);
+            FileWriter writer = new FileWriter(file, true);
             //save username
-
-            //save score of current user
-            writer.write(points);
+            writer.write(name+ " "+ points + " ");
+            writer.close();
         }catch (IOException e){
             System.out.println("File is not found");
         }
-
     }
 
     private AnimationTimer getAnimationTimer(Stage primaryStage) {
@@ -442,8 +458,6 @@ public class Main extends Application {
                 collision(primaryStage, this);
                 moveObjects();
                 removeProjectiles();
-
-                showGameInfo();
 
 
                 //Once a collision occurs, game stops
@@ -470,14 +484,11 @@ public class Main extends Application {
 }
 
     private void showGameInfo() {
-        // Create the score display box for the game scene
-        attributeBox("Score: ", String.valueOf(points), 10, 10);
-        attributeBox(" Level: ", "1",10, 30);
-        attributeBox(" Life: ", "3",10, 50);
+        infoLabel.setText("Score: "+ points +"  \nLife: "+ship.getLives()+"  \nLevel: ");
     }
 
     private void checkCollisionOfShip(FlyingObject obj, Stage primaryStage, AnimationTimer getAnimationTimer) throws Exception {
-        if (ship.collide(obj) && ship.getLives() == 0 && !ship.isInvincibility()) {
+        if (ship.collide(obj) && ship.getLives() == 3 && !ship.isInvincibility()) {
             gameOver(primaryStage, getAnimationTimer);
         } else if (ship.collide(obj) && !ship.isInvincibility()) {
             lastDestroyedTime = System.currentTimeMillis();
@@ -739,10 +750,13 @@ public class Main extends Application {
                     //bonus score can be set up in 'addAndGet' by change the parameter.
                     if (asteroid.getSize() == SMALL.setSize()){
                         points += 250;
+                        showGameInfo();
                     } else if (asteroid.getSize() == MEDIUM.setSize()) {
                         points += 500;
+                        showGameInfo();
                     }else if(asteroid.getSize() == LARGE.setSize()){
                         points += 1000;
+                        showGameInfo();
                     }
                 });
         aliens.stream()
@@ -750,6 +764,7 @@ public class Main extends Application {
                 .forEach(alien -> {
                     pane.getChildren().remove(alien.getShape());
                     points += 2000;
+                    showGameInfo();
                 });
         //Remove all projectiles and asteroids that collide
         projectiles.removeAll(projectiles.stream()
