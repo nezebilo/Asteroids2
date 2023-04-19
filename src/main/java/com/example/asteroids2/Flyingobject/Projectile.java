@@ -11,7 +11,7 @@ public class Projectile extends FlyingObject {
         double changeX = Math.cos(Math.toRadians(this.shape.getRotate()));
         double changeY = Math.sin(Math.toRadians(this.shape.getRotate()));
 
-        for (int i = 0; i < 3; i++){
+        for (int i = 0; i < 1; i++){
             changeX *= 20;
             changeY *= 20;
         }

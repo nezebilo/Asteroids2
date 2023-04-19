@@ -65,8 +65,8 @@ public abstract class FlyingObject {
         double changeX = Math.cos(Math.toRadians(this.shape.getRotate()));
         double changeY = Math.sin(Math.toRadians(this.shape.getRotate()));
 
-        changeX *= 0.02;
-        changeY *= 0.02;
+        changeX *= 0.01;
+        changeY *= 0.01;
 
         this.movement = this.movement.add(changeX, changeY);
     }

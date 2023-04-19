@@ -30,7 +30,6 @@ import javafx.stage.Stage;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static com.example.asteroids2.ConstantVar.Level.*;
 import static com.example.asteroids2.ConstantVar.Size.*;
@@ -46,7 +45,8 @@ public class Main extends Application {
 
     protected Text score;
 
-    protected int points;
+    protected int currentPoints;
+    protected int lastPoints;
     protected Map<KeyCode, Boolean> pressedKeys = new HashMap<>();
     public static int WIDTH = 600;
     public static int HEIGHT = 600;
@@ -87,20 +87,12 @@ public class Main extends Application {
 
     protected Scene mainMenuScene;
     private Pane pauseMenuPane;
-
     private StackPane pauseMenuContainer;
-
     private StackPane gameOverContainer;
-
-    private StackPane highScoreContainer;
     private boolean isPaused = false;
-
     private StackPane root;
     private Label infoLabel;
-
     private String[][] scores;
-
-    private Pane highscorePane;
 
     // Load the custom font
     Font customFont = Font.loadFont(new FileInputStream("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
@@ -152,12 +144,11 @@ public class Main extends Application {
         // Create the game over pane
         ImageView highScoreBg = ButtonMenu.getBackgroundView("/imageAndFont/mainGameBackground.jpg", 400, 300);
 
-        highscorePane = new Pane();
+        Pane highscorePane = new Pane();
 
-        highScoreContainer = new StackPane();
+        StackPane highScoreContainer = new StackPane();
 
         containerSet(highScoreContainer, highScoreBg, highscorePane);
-        System.out.println(root);
 
         root.getChildren().add(highScoreContainer);
 
@@ -180,16 +171,15 @@ public class Main extends Application {
             // sort the scores
             sortTheScores();
 
-            System.out.println(scores.length);
             List<String> scoresList = new ArrayList<>();
-            if(scores.length < 6) {
+            if(scores.length < 5) {
                 for(int i = 0; i <scores.length; i++){
                     scoresList.add("No."+(i+1) + "-" +scores[i][0] +"-"+ scores[i][1]);
                 }
                 // Add some test high scores to the list
                 highScores = FXCollections.observableArrayList(scoresList);
             }else {
-                for(int i = 0; i < 6; i++){
+                for(int i = 0; i < 5; i++){
                     scoresList.add("No."+(i+1) + "-" +scores[i][0] +"-"+ scores[i][1]);
                 }
                 highScores = FXCollections.observableArrayList(scoresList);
@@ -270,21 +260,7 @@ public class Main extends Application {
             primaryStage.show();
 
             // Detect ESC key press event
-            scene.addEventHandler(KeyEvent.KEY_PRESSED, e3 -> {
-                if (e3.getCode() == KeyCode.ESCAPE) {
-                    if (!isPaused) {
-                        getAnimationTimer.stop();
-                        isPaused = true;
-                        // Show pause menu
-                        showPauseMenu(primaryStage, getAnimationTimer);
-                    } else {
-                        pane.getChildren().remove(pauseMenuPane);
-                        pane.getChildren().remove(pauseMenuContainer);
-                        isPaused = false;
-                        getAnimationTimer.start();
-                    }
-                }
-            });
+            escToPause(primaryStage, getAnimationTimer);
         });
         return startBtn;
     }
@@ -305,7 +281,7 @@ public class Main extends Application {
         Pane mainGamePane = new StackPane();
         mainGamePane.getChildren().addAll(backgroundView, pane);
 
-        infoLabel = new Label("Score: "+ points +"  \nLife: 3  \nLevel: 1");
+        infoLabel = new Label("  Score: "+ currentPoints +"  \n  Life: " + (ship.getLives()+1) +  "\n  Level: " + changeLevel());
         // Set the font color to white
         infoLabel.setTextFill(Color.WHITE);
         infoLabel.setFont(customFont);
@@ -316,6 +292,8 @@ public class Main extends Application {
         scene = new Scene(mainGamePane);
         primaryStage.setTitle("Asteroids Game");
         primaryStage.setScene(scene);
+
+
     }
 
 
@@ -361,10 +339,6 @@ public class Main extends Application {
         return resumeBtn;
     }
 
-    private int getHighScore() {
-        return points;
-    }
-
     private void gameOver(Stage primaryStage, AnimationTimer animationTimer) {
 
         ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", 350, 250);
@@ -393,7 +367,7 @@ public class Main extends Application {
         gameOverPane.getChildren().add(gameOverText);
 
         // scoreText
-        Text scoreText = new Text("Your Score: " + points);
+        Text scoreText = new Text("Your Score: " + currentPoints);
         scoreText.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
         scoreText.setLayoutX(110);
         scoreText.setLayoutY(95);
@@ -410,7 +384,12 @@ public class Main extends Application {
             if (result.isPresent()) {
                 String name = result.get();
                 // record the score with the name
-                if(name != "") recordNameScore(name.replace(" ", "_"));
+                if(!name.equals("")){
+                    recordNameScore(name.replace(" ", "_"));
+                } else {
+                    name = "Unknown";
+                    recordNameScore(name.replace(" ", "_"));
+                }
             }
         });
 
@@ -437,14 +416,37 @@ public class Main extends Application {
         aliens = new ArrayList<>();
         projectiles = new ArrayList<>();
         alienProjectiles = new ArrayList<>();
-        points = 0;
-        ship.setLives(3);
-//        ship.setMovement(new Point2D(0, 0));
+        pressedKeys = new HashMap<>();
+
+        currentPoints = 0;
+        ship = new Ship(WIDTH / 2, HEIGHT / 2);
+
+        startTime = System.currentTimeMillis();
 
         // Start the game
         mainGameScene(primaryStage);
         AnimationTimer getAnimationTimer = getAnimationTimer(primaryStage);
-        getAnimationTimer.start();;
+        getAnimationTimer.start();
+        escToPause(primaryStage, getAnimationTimer);
+
+    }
+
+    private void escToPause(Stage primaryStage, AnimationTimer getAnimationTimer) {
+        scene.addEventHandler(KeyEvent.KEY_PRESSED, e3 -> {
+            if (e3.getCode() == KeyCode.ESCAPE) {
+                if (!isPaused) {
+                    getAnimationTimer.stop();
+                    isPaused = true;
+                    // Show pause menu
+                    showPauseMenu(primaryStage, getAnimationTimer);
+                } else {
+                    pane.getChildren().remove(pauseMenuPane);
+                    pane.getChildren().remove(pauseMenuContainer);
+                    isPaused = false;
+                    getAnimationTimer.start();
+                }
+            }
+        });
     }
 
 
@@ -457,10 +459,10 @@ public class Main extends Application {
             int charCount = reader.read();
             if(charCount == -1){
                 //save username
-                writer.write(name+ " "+ points);
+                writer.write(name+ " "+ currentPoints);
             } else {
                 //save username
-                writer.write(" " + name+ " "+ points);
+                writer.write(" " + name+ " "+ currentPoints);
             }
             reader.close();
             writer.close();
@@ -489,7 +491,7 @@ public class Main extends Application {
                 moveObjects();
                 removeProjectiles();
 
-                showGameInfo();
+
 
 
                 //Once a collision occurs, game stops
@@ -516,11 +518,11 @@ public class Main extends Application {
 }
 
     private void showGameInfo() {
-        infoLabel.setText("Score: "+ points +"  \nLife: "+ship.getLives()+"  \nLevel: ");
+        infoLabel.setText("  Score: "+ currentPoints +"  \n  Life: "+(ship.getLives()+1)+"  \n  Level: " + changeLevel());
     }
 
     private void checkCollisionOfShip(FlyingObject obj, Stage primaryStage, AnimationTimer getAnimationTimer) throws Exception {
-        if (ship.collide(obj) && ship.getLives() == 3 && !ship.isInvincibility()) {
+        if (ship.collide(obj) && ship.getLives() == 0 && !ship.isInvincibility()) {
             gameOver(primaryStage, getAnimationTimer);
         } else if (ship.collide(obj) && !ship.isInvincibility()) {
             lastDestroyedTime = System.currentTimeMillis();
@@ -534,7 +536,7 @@ public class Main extends Application {
             ship.setInvincibility(true);
             ship.setLives(temp);
             //Change the colour of the reborn ship
-            ship.getShape().setFill(Color.web("#FF0000"));
+            ship.getShape().setFill(Color.RED);
             pane.getChildren().add(ship.getShape());
         }
     }
@@ -643,7 +645,7 @@ public class Main extends Application {
                 Math.pow(ship.getMovement().getY(), 2))) * 60 ;
         if (pressedKeys.getOrDefault(KeyCode.UP, false)) {
             //limit the speed of the ship, prevents unlimited increase in speed of ship
-            if (speed < 500){
+            if (speed < 200){
                 ship.accelerate();
             }
         }
@@ -716,7 +718,7 @@ public class Main extends Application {
             }
         }
         //make all projectiles move
-        projectiles.forEach(projectile -> projectile.move());
+        projectiles.forEach(FlyingObject::move);
     }
 
     private void alienFire(){
@@ -747,7 +749,7 @@ public class Main extends Application {
         }
 
         //make all projectiles move
-        alienProjectiles.forEach(alienProjectile -> alienProjectile.move());
+        alienProjectiles.forEach(FlyingObject::move);
     }
 
     //remove projectiles that have timed out
@@ -784,33 +786,46 @@ public class Main extends Application {
                     //For each asteroid destroyed, the player gains ten points
                     //bonus score can be set up in 'addAndGet' by change the parameter.
                     if (asteroid.getSize() == SMALL.setSize()){
-                        points += 250;
+                        currentPoints += 250;
+                        lastPoints += 250;
+                        showGameInfo();
+                        bonusLife();
+
                     } else if (asteroid.getSize() == MEDIUM.setSize()) {
-                        points += 500;
+                        currentPoints += 500;
+                        lastPoints += 500;
+                        showGameInfo();
+                        bonusLife();
                     }else if(asteroid.getSize() == LARGE.setSize()){
-                        points += 1000;
+                        currentPoints += 1000;
+                        lastPoints += 1000;
+                        showGameInfo();
+                        bonusLife();
                     }
                 });
         aliens.stream()
                 .filter(alien -> !alien.getIsALive())
                 .forEach(alien -> {
                     pane.getChildren().remove(alien.getShape());
-                    points += 2000;
+                    currentPoints += 2000;
+                    lastPoints += 2000;
+                    showGameInfo();
+                    bonusLife();
                 });
-        showGameInfo();
+
         //Remove all projectiles and asteroids that collide
         projectiles.removeAll(projectiles.stream()
                 .filter(projectile -> !projectile.getIsALive())
-                .collect(Collectors.toList()));
+                .toList());
         alienProjectiles.removeAll(alienProjectiles.stream()
                 .filter(alienProjectile -> !alienProjectile.getIsALive())
-                .collect(Collectors.toList()));
+                .toList());
         asteroids.removeAll(asteroids.stream()
                 .filter(asteroid -> !asteroid.getIsALive())
-                .collect(Collectors.toList()));
+                .toList());
         aliens.removeAll(aliens.stream()
                 .filter(alien -> !alien.getIsALive())
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     public void collision(Stage primaryStage, AnimationTimer getAnimationTimer) {
@@ -874,30 +889,39 @@ public class Main extends Application {
                         }
                     }
                 });
-        smallerAsteroids.forEach(smallerAsteroid ->
-        {
-            smallerAsteroid.move();
-        });
+        smallerAsteroids.forEach(Asteroid::move);
         return smallerAsteroids;
     }
 
     private String changeLevel(){
-        if (System.currentTimeMillis() - startTime< Level.EASY_TIME.setLevel()){
+        double duration = System.currentTimeMillis() - startTime;
+        if (duration < Level.EASY_TIME.setLevel()){
             return String.valueOf(EASY_LEVEL.setLevel());
-        } else if ((System.currentTimeMillis() - startTime > EASY_TIME.setLevel())
-                && (System.currentTimeMillis() - startTime <= MODERATE_TIME.setLevel())) {
+        } else if ((duration > EASY_TIME.setLevel())
+                && (duration <= MODERATE_TIME.setLevel())) {
             return String.valueOf(MODERATE_LEVEL.setLevel());
-        } else if (System.currentTimeMillis() - startTime > HARD_TIME.setLevel()) {
+        } else {
             return String.valueOf(HARD_LEVEL.setLevel());
         }
-        return String.valueOf(EASY_LEVEL.setLevel());
+    }
+
+    private void bonusLife(){
+        System.out.println("work");
+        if (lastPoints >= 5000){
+            lastPoints -= 5000;
+            if (ship.getLives() <= 5)  {
+                ship.setLives(ship.getLives() + 1);
+                infoLabel.setText("  Score: "+ currentPoints +"  \n  Life: "+
+                        (ship.getLives()+1)+"  LIFE + 1"+"  \n  Level: " + changeLevel());
+            }
+        }
     }
 
     //make all asteroids can move
     private void moveObjects() {
-        asteroids.forEach(asteroid -> asteroid.move());
-        projectiles.forEach(projectile -> projectile.move());
-        aliens.forEach(alien -> alien.move());
+        asteroids.forEach(Asteroid::move);
+//        projectiles.forEach(projectile -> projectile.move());
+        aliens.forEach(FlyingObject::move);
     }
      
     public static void main(String[] args) {

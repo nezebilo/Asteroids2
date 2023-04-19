@@ -1,1 +1,1 @@
-Guo 0 Bob 8250 king_of_game 9000 A 1000 Potato 9500  9500 David 1500 OK_fine 1500  3500  3000  2000
+GZH 20000 Tone 2500 Unknown 1000 Bob 2000 Unknown 1000 Unknown 0 Unknown 0 Unknown 0 Unknown 0 Unknown 0 king 3250 Unknown 0

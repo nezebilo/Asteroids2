@@ -1,9 +1,9 @@
 package com.example.asteroids2.ConstantVar;
 
 public enum Level {
-    EASY_TIME(60000),
-    MODERATE_TIME(120000),
-    HARD_TIME(180000),
+    EASY_TIME(10000),
+    MODERATE_TIME(20000),
+    HARD_TIME(30000),
 
     EASY_LEVEL(1),
     MODERATE_LEVEL(2),
