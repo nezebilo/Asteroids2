@@ -26,6 +26,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
+
+import java.io.File;
 
 import java.io.*;
 import java.util.*;
@@ -96,6 +101,32 @@ public class Main extends Application {
 
     // Load the custom font
     Font customFont = Font.loadFont(new FileInputStream("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
+
+    // Load background music
+    String musicFile = "src/main/resources/sfx/Enigma-Long-Version-Complete-Version.mp3";
+
+    Media sound = new Media(new File(musicFile).toURI().toString());
+    MediaPlayer music = new MediaPlayer(sound);
+
+    // Load fire sound effect
+    String fireSFXFile = "src/main/resources/sfx/mixkit-laser-gun-shot-3110.wav";
+
+    Media fireSFXSound = new Media(new File(fireSFXFile).toURI().toString());
+    MediaPlayer fireSFX = new MediaPlayer(fireSFXSound);
+
+    // Load explosion sound effect
+    String explodeSFXFile = "src/main/resources/sfx/mixkit-arcade-chiptune-explosion-1691.wav";
+
+    Media explodeSFXSound = new Media(new File(explodeSFXFile).toURI().toString());
+    MediaPlayer explodeSFX = new MediaPlayer(explodeSFXSound);
+
+    // Load jump sound effect
+    String jumpSFXFile = "src/main/resources/sfx/mixkit-space-deploy-whizz-3003.wav";
+
+    Media jumpSFXSound = new Media(new File(jumpSFXFile).toURI().toString());
+    MediaPlayer jumpSFX = new MediaPlayer(jumpSFXSound);
+
+
     public Main() throws FileNotFoundException {
     }
 
@@ -288,6 +319,15 @@ public class Main extends Application {
 
         pane.getChildren().add(infoLabel);
 
+        // Set music to loop
+        music.setOnEndOfMedia(new Runnable() {
+            public void run() {
+                music.seek(Duration.ZERO);
+            }
+        });
+        // Start game music
+        music.play();
+
 
         scene = new Scene(mainGamePane);
         primaryStage.setTitle("Asteroids Game");
@@ -342,6 +382,9 @@ public class Main extends Application {
     private void gameOver(Stage primaryStage, AnimationTimer animationTimer) {
 
         ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", 350, 250);
+
+        // Stop the music
+        music.stop();
 
         // Stop the animation timer
         animationTimer.stop();
@@ -673,6 +716,10 @@ public class Main extends Application {
                 //only a thrust has successfully occurred, we record the time
                 lastThrustTime = System.currentTimeMillis();
                 pane.getChildren().add(ship.getShape());
+                // play jump sound
+                jumpSFX.play();
+                // rewind jump sound to beginning
+                jumpSFX.seek(Duration.ZERO);
             }
         }
 
@@ -715,6 +762,11 @@ public class Main extends Application {
                 projectile.accelerate();
                 projectile.setMovement(projectile.getMovement().normalize().multiply(3));
                 pane.getChildren().add(projectile.getShape());
+
+                // play sound
+                fireSFX.play();
+                // return sound to beginning
+                fireSFX.seek(Duration.ZERO);
             }
         }
         //make all projectiles move
@@ -841,6 +893,10 @@ public class Main extends Application {
                     //it mean that the status objects marked as false should be deleted
                     projectile.setIsALive(false);
                     asteroid.setIsALive(false);
+                    // play explosion sound
+                    explodeSFX.play();
+                    // rewind explosion sound to beginning
+                    explodeSFX.seek(Duration.ZERO);
                 }
             });
             //check projectiles and aliens
@@ -852,6 +908,10 @@ public class Main extends Application {
                     //it mean that the status objects marked as false should be deleted
                     projectile.setIsALive(false);
                     alien.setIsALive(false);
+                    // play explosion sound
+                    explodeSFX.play();
+                    // rewind explosion sound to beginning
+                    explodeSFX.seek(Duration.ZERO);
                 }
             });
         });
