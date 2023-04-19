@@ -566,6 +566,10 @@ public class Main extends Application {
 
     private void checkCollisionOfShip(FlyingObject obj, Stage primaryStage, AnimationTimer getAnimationTimer) throws Exception {
         if (ship.collide(obj) && ship.getLives() == 0 && !ship.isInvincibility()) {
+            // play explosion sound
+            explodeSFX.play();
+            // rewind explosion sound to beginning
+            explodeSFX.seek(Duration.ZERO);
             gameOver(primaryStage, getAnimationTimer);
         } else if (ship.collide(obj) && !ship.isInvincibility()) {
             lastDestroyedTime = System.currentTimeMillis();
@@ -581,6 +585,10 @@ public class Main extends Application {
             //Change the colour of the reborn ship
             ship.getShape().setFill(Color.RED);
             pane.getChildren().add(ship.getShape());
+            // play explosion sound
+            explodeSFX.play();
+            // rewind explosion sound to beginning
+            explodeSFX.seek(Duration.ZERO);
         }
     }
 
