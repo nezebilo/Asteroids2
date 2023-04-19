@@ -98,6 +98,8 @@ public class Main extends Application {
 
     private String[][] scores;
 
+    private Pane highscorePane;
+
     // Load the custom font
     Font customFont = Font.loadFont(new FileInputStream("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
     public Main() throws FileNotFoundException {
@@ -148,11 +150,12 @@ public class Main extends Application {
         // Create the game over pane
         ImageView highScoreBg = ButtonMenu.getBackgroundView("/imageAndFont/mainGameBackground.jpg", 400, 300);
 
-        Pane highscorePane = new Pane();
+        highscorePane = new Pane();
 
         highScoreContainer = new StackPane();
 
         containerSet(highScoreContainer, highScoreBg, highscorePane);
+        System.out.println(root);
 
         root.getChildren().add(highScoreContainer);
 
@@ -167,18 +170,35 @@ public class Main extends Application {
 
         // Read the file
         readFile();
+        ObservableList<String> highScores;
 
-        // sort the scores
-        sortTheScores();
+        if (scores == null) {
+            highScores = FXCollections.observableArrayList("no scores");
+        } else {
+            // sort the scores
+            sortTheScores();
 
-        // List
-        List<String> scoresList = new ArrayList<>();
-        for(int i = 0; i <5; i++){
-            scoresList.add("No."+(i+1) + "-" +scores[i][0] +"-"+ scores[i][1]);
+            System.out.println(scores.length);
+            List<String> scoresList = new ArrayList<>();
+            if(scores.length < 6) {
+                for(int i = 0; i <scores.length; i++){
+                    scoresList.add("No."+(i+1) + "-" +scores[i][0] +"-"+ scores[i][1]);
+                }
+                // Add some test high scores to the list
+                highScores = FXCollections.observableArrayList(scoresList);
+            }else {
+                for(int i = 0; i < 6; i++){
+                    scoresList.add("No."+(i+1) + "-" +scores[i][0] +"-"+ scores[i][1]);
+                }
+                highScores = FXCollections.observableArrayList(scoresList);
+            }
+
+
+
+
         }
 
-        // Add some test high scores to the list
-        ObservableList<String> highScores = FXCollections.observableArrayList(scoresList);
+
 
         highScoreListView.setItems(highScores);
 
@@ -280,8 +300,8 @@ public class Main extends Application {
         addRoles(pane);
 
         // Create a StackPane to hold the background and game pane
-        root = new StackPane();
-        root.getChildren().addAll(backgroundView, pane);
+        Pane mainGamePane = new StackPane();
+        mainGamePane.getChildren().addAll(backgroundView, pane);
 
         infoLabel = new Label("Score: "+ points +"  \nLife: 3  \nLevel: 1");
         // Set the font color to white
@@ -291,7 +311,7 @@ public class Main extends Application {
         pane.getChildren().add(infoLabel);
 
 
-        scene = new Scene(root);
+        scene = new Scene(mainGamePane);
         primaryStage.setTitle("Asteroids Game");
         primaryStage.setScene(scene);
     }
@@ -388,7 +408,7 @@ public class Main extends Application {
             if (result.isPresent()) {
                 String name = result.get();
                 // record the score with the name
-                 recordNameScore(name);
+                if(name != "") recordNameScore(name.replace(" ", "_"));
             }
         });
 
@@ -431,8 +451,16 @@ public class Main extends Application {
         try {
             File file = new File("src/main/java/com/example/asteroids2/highScores.txt");
             FileWriter writer = new FileWriter(file, true);
-            //save username
-            writer.write(name+ " "+ points + " ");
+            FileReader reader = new FileReader(file);
+            int charCount = reader.read();
+            if(charCount == -1){
+                //save username
+                writer.write(name+ " "+ points);
+            } else {
+                //save username
+                writer.write(" " + name+ " "+ points);
+            }
+            reader.close();
             writer.close();
         }catch (IOException e){
             System.out.println("File is not found");
