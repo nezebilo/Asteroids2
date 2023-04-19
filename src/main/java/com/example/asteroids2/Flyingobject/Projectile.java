@@ -11,8 +11,11 @@ public class Projectile extends FlyingObject {
         double changeX = Math.cos(Math.toRadians(this.shape.getRotate()));
         double changeY = Math.sin(Math.toRadians(this.shape.getRotate()));
 
-        changeX *= 10;
-        changeY *= 10;
+        for (int i = 0; i < 3; i++){
+            changeX *= 20;
+            changeY *= 20;
+        }
+
 
         this.movement = this.movement.add(changeX, changeY);
     }

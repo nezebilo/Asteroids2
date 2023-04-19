@@ -1,5 +1,6 @@
 package com.example.asteroids2;
 
+import com.example.asteroids2.ConstantVar.Level;
 import com.example.asteroids2.Flyingobject.*;
 import com.example.asteroids2.MenuUi.ButtonMenu;
 import javafx.animation.AnimationTimer;
@@ -70,6 +71,7 @@ public class Main extends Application {
 
     protected double alienLastFireTime;
     protected double lastThrustTime;
+    protected String currentLevel = "1";
 
     protected static final int SHIP_FIRE_INTERVAL = 500; // ms
     protected static final int ALIEN_FIRE_INTERVAL = 5000; // ms
@@ -401,26 +403,12 @@ public class Main extends Application {
         alienProjectiles = new ArrayList<>();
         points = 0;
         ship.setLives(3);
+        ship.setMovement(new Point2D(0,0));
 
         // Start the game
         mainGameScene(primaryStage);
         AnimationTimer getAnimationTimer = getAnimationTimer(primaryStage);
         getAnimationTimer.start();;
-    }
-
-    private void recordScore()  {
-        // Implement the logic to record the player's score
-        try {
-            File file = new File("src/main/java/com/example/asteroids2/highScores.txt");
-            FileWriter writer = new FileWriter(file);
-            //save username
-
-            //save score of current user
-            writer.write(points);
-        }catch (IOException e){
-            System.out.println("File is not found");
-        }
-
     }
 
     private AnimationTimer getAnimationTimer(Stage primaryStage) {
@@ -472,8 +460,8 @@ public class Main extends Application {
     private void showGameInfo() {
         // Create the score display box for the game scene
         attributeBox("Score: ", String.valueOf(points), 10, 10);
-        attributeBox(" Level: ", "1",10, 30);
-        attributeBox(" Life: ", "3",10, 50);
+        attributeBox(" Level: ", changeLevel(),10, 30);
+        attributeBox(" Life: ", String.valueOf(ship.getLives()),10, 50);
     }
 
     private void checkCollisionOfShip(FlyingObject obj, Stage primaryStage, AnimationTimer getAnimationTimer) throws Exception {
@@ -526,20 +514,20 @@ public class Main extends Application {
     private void createAsteroids(Pane pane) {
         //if a random number is less 0.005, a new asteroids will be added to the window.
         if (Math.random() < CREATED_PROBABILITY) {
-            if ((System.currentTimeMillis() - startTime) <= EASY.setLevel()) {
+            if ((System.currentTimeMillis() - startTime) <= Level.EASY_TIME.setLevel()) {
                 Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, LARGE.setSize(), LOWER.setSpeedRate());
                 if (!asteroid.collide(ship)) {
                     asteroids.add(asteroid);
                     pane.getChildren().add(asteroid.getShape());
                 }
-            } else if ((System.currentTimeMillis() - startTime) > EASY.setLevel()
-                    && (System.currentTimeMillis() - startTime <= MODERATE.setLevel())) {
+            } else if ((System.currentTimeMillis() - startTime) > Level.EASY_TIME.setLevel()
+                    && (System.currentTimeMillis() - startTime <= MODERATE_TIME.setLevel())) {
                 Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, random.nextInt(MEDIUM.setSize(), LARGE.setSize() + 1), NORMAL.setSpeedRate());
                 if (!asteroid.collide(ship)) {
                     asteroids.add(asteroid);
                     pane.getChildren().add(asteroid.getShape());
                 }
-            } else if ((System.currentTimeMillis() - startTime) > HARD.setLevel()) {
+            } else if ((System.currentTimeMillis() - startTime) > HARD_TIME.setLevel()) {
                 Asteroid asteroid = new Asteroid(WIDTH, HEIGHT, random.nextInt(SMALL.setSize(), LARGE.setSize() + 1), FASTER.setSpeedRate());
                 if (!asteroid.collide(ship)) {
                     asteroids.add(asteroid);
@@ -553,8 +541,8 @@ public class Main extends Application {
     private void createAliens(Pane pane) {
         //if a random number is less 0.005, a new aliens will be added to the window.
         if (Math.random() < CREATED_PROBABILITY && (aliens.size() <= ALIEN_EXISTING_MAXIMUM)) {
-            if (((System.currentTimeMillis() - startTime) > MODERATE.setLevel()) &
-                    ((System.currentTimeMillis() - startTime) <= HARD.setLevel())) {
+            if (((System.currentTimeMillis() - startTime) > MODERATE_TIME.setLevel()) &
+                    ((System.currentTimeMillis() - startTime) <= HARD_TIME.setLevel())) {
                 Alien alien = new Alien(WIDTH, HEIGHT,1);
                 if (!alien.collide(ship)) {
                     aliens.add(alien);
@@ -600,8 +588,8 @@ public class Main extends Application {
                 Math.pow(ship.getMovement().getY(), 2))) * 60 ;
         if (pressedKeys.getOrDefault(KeyCode.UP, false)) {
             //limit the speed of the ship, prevents unlimited increase in speed of ship
-            if (speed < 200){
-                ship.accelerate(1);
+            if (speed < 500){
+                ship.accelerate();
             }
         }
 
@@ -681,15 +669,19 @@ public class Main extends Application {
         if (System.currentTimeMillis() - alienLastFireTime > ALIEN_FIRE_INTERVAL) {
             alienLastFireTime = System.currentTimeMillis();
             aliens.forEach(alien -> {
+
                 Projectile alienprojectile = new Projectile(
                         (int) alien.getShape().getTranslateX(),
                         (int) alien.getShape().getTranslateY());
-                alienprojectile.getShape().setRotate(
-                        Math.toDegrees(
-                                Math.atan(
-                                        (ship.getShape().getTranslateY() - alien.getShape().getTranslateY())/
-                                                (ship.getShape().getTranslateX() - alien.getShape().getTranslateX())
-                                )));
+                if (alien.getShape().getTranslateY() > ship.getShape().getTranslateY()){
+                    alienprojectile.getShape().setRotate(
+                            Math.toDegrees(
+                                    Math.atan(
+                                            (ship.getShape().getTranslateY() - alien.getShape().getTranslateY())/
+                                                    (ship.getShape().getTranslateX() - alien.getShape().getTranslateX())
+                                    )));
+                }
+
                 alienProjectiles.add(alienprojectile);
 
 
@@ -834,9 +826,22 @@ public class Main extends Application {
         return smallerAsteroids;
     }
 
+    private String changeLevel(){
+        if (System.currentTimeMillis() - startTime< Level.EASY_TIME.setLevel()){
+            return String.valueOf(EASY_LEVEL.setLevel());
+        } else if ((System.currentTimeMillis() - startTime > EASY_TIME.setLevel())
+                && (System.currentTimeMillis() - startTime <= MODERATE_TIME.setLevel())) {
+            return String.valueOf(MODERATE_LEVEL.setLevel());
+        } else if (System.currentTimeMillis() - startTime > HARD_TIME.setLevel()) {
+            return String.valueOf(HARD_LEVEL.setLevel());
+        }
+        return String.valueOf(EASY_LEVEL.setLevel());
+    }
+
     //make all asteroids can move
     private void moveObjects() {
         asteroids.forEach(asteroid -> asteroid.move());
+        projectiles.forEach(projectile -> projectile.move());
         aliens.forEach(alien -> alien.move());
     }
      

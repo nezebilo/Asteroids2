@@ -25,7 +25,7 @@ public abstract class FlyingObject {
         this.lives = 1;
         this.movement = new Point2D(0, 0);
         this.createTime = System.currentTimeMillis();
-        this.getShape().setFill(Color.WHITE);
+        this.shape.setFill(Color.WHITE);
     }
 
     public Polygon getShape() {
@@ -61,12 +61,12 @@ public abstract class FlyingObject {
         }
     }
 
-    public void accelerate(double coefficient) {
+    public void accelerate() {
         double changeX = Math.cos(Math.toRadians(this.shape.getRotate()));
         double changeY = Math.sin(Math.toRadians(this.shape.getRotate()));
 
-        changeX *= 0.01 * coefficient;
-        changeY *= 0.01 * coefficient;
+        changeX *= 0.02;
+        changeY *= 0.02;
 
         this.movement = this.movement.add(changeX, changeY);
     }
