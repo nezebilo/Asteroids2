@@ -651,6 +651,10 @@ public class Main extends Application {
     private void addRoles(Pane pane) {
         //create ship and add it to pane
         ship = new Ship(WIDTH / 2, HEIGHT / 2);
+        //set the ship invincible
+        ship.setInvincibility(true);
+        lastDestroyedTime = System.currentTimeMillis();
+        ship.getShape().setFill(Color.RED);
         pane.getChildren().add(ship.getShape());
         //create some lowest moving asteroids when a new game starts
         Random rnd = new Random();
