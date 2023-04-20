@@ -98,11 +98,16 @@ public class Main extends Application {
     private String[][] scores;
 
     // Load the custom font
-    static Font customFont = Font.loadFont(new FileInputStream("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
+    static Font customFont;
 
 
     // set the font
     static {
+        try {
+            customFont = Font.loadFont(new FileInputStream("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         try {
             customFont = Font.loadFont(new FileInputStream
                     ("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
@@ -194,10 +199,10 @@ public class Main extends Application {
 
     private static Text playInstructionSetting() {
         Text platingInstruction = new Text("""
-                               Gameplay introduction:
-                    UP: acceleration    DOWN: deceleration
-                         LEFT & RIGHT: rotate   B: brake
-                        SPACE: fire   J: jump   ESC: pause\
+                                      How To Control:
+                    UP: Acceleration    DOWN: Deceleration
+                         LEFT & RIGHT: Rotate   B: Brake
+                        SPACE: Fire   J: Hyperspace Jump   ESC: Pause\
                 """);
         platingInstruction.setFill(Color.WHITE);
         return platingInstruction;
@@ -349,13 +354,13 @@ public class Main extends Application {
         infoLabel.setFont(customFont);
 
         Label playInstructMainMenu = new Label("""
-                   UP: acceleration
-                   DOWN: brake
-                   B: brake
-                   LEFT & RIGHT: rotate
-                   SPACE: fire
-                   J: jump(3sCD)
-                   ESC: pause\
+                   UP: Acceleration
+                   DOWN: Deceleration
+                   B: Brake
+                   LEFT & RIGHT: Rotate
+                   SPACE: Fire
+                   J: Jump
+                   ESC: Pause Game\
                 """);
         playInstructMainMenu.setTextFill(Color.WHITE);
         playInstructMainMenu.setLayoutY(485);
@@ -748,12 +753,7 @@ public class Main extends Application {
 
         //This function is used to slow down the ship, but our project does not need this function.
         if (pressedKeys.getOrDefault(KeyCode.DOWN, false)) {
-            if (speed >= 0) {
-                ship.setMovement(new Point2D(0, 0));
-            }
-            if (speed < 200){
                 ship.decelerate();
-            }
         }
         // Brake
         if (pressedKeys.getOrDefault(KeyCode.B, false)) {
