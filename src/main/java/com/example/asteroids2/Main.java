@@ -194,9 +194,12 @@ public class Main extends Application {
     }
 
     private static Text playInstructionSetting() {
-        Text platingInstruction = new Text("               Gameplay introduction:\n UP: acceleration" +
-                "       DOWN: deceleration\n        LEFT & RIGHT: rotate   B: brake\n     " +
-                "  SPACE: fire   J: jump   ESC: pause");
+        Text platingInstruction = new Text("""
+                               Gameplay introduction:
+                    UP: acceleration    DOWN: deceleration
+                         LEFT & RIGHT: rotate   B: brake
+                        SPACE: fire   J: jump   ESC: pause\
+                """);
         platingInstruction.setFill(Color.WHITE);
         return platingInstruction;
     }
@@ -342,9 +345,15 @@ public class Main extends Application {
         infoLabel.setTextFill(Color.WHITE);
         infoLabel.setFont(customFont);
 
-        Label playInstructMainMenu = new Label("   UP: acceleration\n" +
-                                                "   DOWN: brake\n   B: brake\n   LEFT & RIGHT: rotate\n   " +
-                                                "SPACE: fire\n   J: jump(3sCD)\n   ESC: pause");
+        Label playInstructMainMenu = new Label("""
+                   UP: acceleration
+                   DOWN: brake
+                   B: brake
+                   LEFT & RIGHT: rotate
+                   SPACE: fire
+                   J: jump(3sCD)
+                   ESC: pause\
+                """);
         playInstructMainMenu.setTextFill(Color.WHITE);
         playInstructMainMenu.setLayoutY(485);
         playInstructMainMenu.setLayoutX(0);
