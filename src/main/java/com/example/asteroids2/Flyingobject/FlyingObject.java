@@ -71,6 +71,16 @@ public abstract class FlyingObject {
         this.movement = this.movement.add(changeX, changeY);
     }
 
+    public void decelerate() {
+        double changeX = Math.cos(Math.toRadians(this.shape.getRotate()));
+        double changeY = Math.sin(Math.toRadians(this.shape.getRotate()));
+
+        changeX *= 0.01;
+        changeY *= 0.01;
+
+        this.movement = this.movement.subtract(changeX, changeY);
+    }
+
     public Point2D getMovement() {
         return movement;
     }

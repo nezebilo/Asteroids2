@@ -100,7 +100,17 @@ public class Main extends Application {
     private String[][] scores;
 
     // Load the custom font
-    Font customFont = Font.loadFont(new FileInputStream("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
+    static Font customFont;
+
+    // set the font
+    static {
+        try {
+            customFont = Font.loadFont(new FileInputStream
+                    ("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     // Load background music
     String musicFile = "src/main/resources/sfx/Enigma-Long-Version-Complete-Version.mp3";
@@ -134,7 +144,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         //Load the background image
-        ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", 400, 300);
+        ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", 400, 340);
 
         // Create the "Start Game" button with the custom image
         Button startBtn = getStartButton(primaryStage);
@@ -146,19 +156,31 @@ public class Main extends Application {
         Button highScoreBtn = new Button("High Score List");
         highScoreBtn.setFont(customFont);
 
+        // GAME TITLE
+        Text gameTitleText = new Text("Asteroids");
+        gameTitleText.setFont(Font.font("Arial", FontWeight.BOLD, 50));
+        gameTitleText.setFill(Color.BLACK);
+
+
+        // Playing instruction
+        Text platingInstruction = playInstructionSetting();
+
         // Create the main menu layout
-        VBox mainMenuLayout = new VBox(20, startBtn, quitBtn, highScoreBtn);
+        VBox mainMenuLayout = new VBox(20, gameTitleText, startBtn, quitBtn, highScoreBtn, platingInstruction);
         mainMenuLayout.setAlignment(Pos.CENTER);
 
         // Create a StackPane to hold the background and menu layout
         root = new StackPane();
+
+
         root.getChildren().addAll(backgroundView, mainMenuLayout);
 
+
         // Create the main menu scene
-        mainMenuScene = new Scene(root, 400, 300);
+        mainMenuScene = new Scene(root, 400, 340);
         //stage > scene > pane
         //game pane
-        primaryStage.setTitle("Game Title");
+        primaryStage.setTitle("Asteroids");
         primaryStage.setScene(mainMenuScene);
         primaryStage.show();
 
@@ -171,9 +193,17 @@ public class Main extends Application {
         });
     }
 
+    private static Text playInstructionSetting() {
+        Text platingInstruction = new Text("               Gameplay introduction:\n UP: acceleration" +
+                "       DOWN: deceleration\n        LEFT & RIGHT: rotate   B: brake\n     " +
+                "  SPACE: fire   J: jump   ESC: pause");
+        platingInstruction.setFill(Color.WHITE);
+        return platingInstruction;
+    }
+
     private void highScoreMenu() throws IOException {
         // Create the game over pane
-        ImageView highScoreBg = ButtonMenu.getBackgroundView("/imageAndFont/mainGameBackground.jpg", 400, 300);
+        ImageView highScoreBg = ButtonMenu.getBackgroundView("/imageAndFont/mainGameBackground.jpg", 400, 340);
 
         Pane highscorePane = new Pane();
 
@@ -215,13 +245,7 @@ public class Main extends Application {
                 }
                 highScores = FXCollections.observableArrayList(scoresList);
             }
-
-
-
-
         }
-
-
 
         highScoreListView.setItems(highScores);
 
@@ -312,12 +336,23 @@ public class Main extends Application {
         Pane mainGamePane = new StackPane();
         mainGamePane.getChildren().addAll(backgroundView, pane);
 
-        infoLabel = new Label("  Score: "+ currentPoints +"  \n  Life: " + (ship.getLives()+1) +  "\n  Level: " + changeLevel());
+        infoLabel = new Label("  Score: "+ currentPoints +"  \n  Life: " +
+                (ship.getLives()+1) +  "\n  Level: " + changeLevel());
         // Set the font color to white
         infoLabel.setTextFill(Color.WHITE);
         infoLabel.setFont(customFont);
 
+        Label playInstructMainMenu = new Label("   UP: acceleration\n" +
+                                                "   DOWN: brake\n   B: brake\n   LEFT & RIGHT: rotate\n   " +
+                                                "SPACE: fire\n   J: jump(3sCD)\n   ESC: pause");
+        playInstructMainMenu.setTextFill(Color.WHITE);
+        playInstructMainMenu.setLayoutY(485);
+        playInstructMainMenu.setLayoutX(0);
+
+
+
         pane.getChildren().add(infoLabel);
+        pane.getChildren().add(playInstructMainMenu);
 
         // Set music to loop
         music.setOnEndOfMedia(new Runnable() {
@@ -700,13 +735,15 @@ public class Main extends Application {
                 ship.accelerate();
             }
         }
-
-
         //This function is used to slow down the ship, but our project does not need this function.
         if (pressedKeys.getOrDefault(KeyCode.DOWN, false)) {
-            if (speed >= 0 ){
-                ship.setMovement(new Point2D(0,0));
+            if (speed < 200){
+                ship.decelerate();
             }
+        }
+        // Brake
+        if (pressedKeys.getOrDefault(KeyCode.B, false)) {
+                ship.setMovement(new Point2D(0,0));
         }
 
 
