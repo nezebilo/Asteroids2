@@ -104,11 +104,6 @@ public class Main extends Application {
     // set the font
     static {
         try {
-            customFont = Font.loadFont(new FileInputStream("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        try {
             customFont = Font.loadFont(new FileInputStream
                     ("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
         } catch (FileNotFoundException e) {
