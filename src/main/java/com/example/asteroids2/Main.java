@@ -148,7 +148,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         //Load the background image
-        ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", 400, 300);
+        ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", 400, 340);
 
         // Create the "Start Game" button with the custom image
         Button startBtn = getStartButton(primaryStage);
@@ -199,9 +199,9 @@ public class Main extends Application {
 
     private static Text playInstructionSetting() {
         Text platingInstruction = new Text("""
-                                      How To Control:
-                    UP: Acceleration    DOWN: Deceleration
-                         LEFT & RIGHT: Rotate   B: Brake
+                                            How To Control:
+                            UP: Acceleration    DOWN: Deceleration
+                               LEFT & RIGHT: Rotate   B: Brake
                         SPACE: Fire   J: Hyperspace Jump   ESC: Pause\
                 """);
         platingInstruction.setFill(Color.WHITE);
