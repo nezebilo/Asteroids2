@@ -49,7 +49,7 @@ public class Asteroid extends FlyingObject {
     public static Polygon createPolygon(int times) {
         Random rnd = new Random();
 
-        int numSides = rnd.nextInt(8) + 3;
+        int numSides = rnd.nextInt(3) + 4;
         double size = 10*times + rnd.nextInt(10);
 
         Polygon polygon = new Polygon();

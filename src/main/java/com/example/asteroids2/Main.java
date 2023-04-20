@@ -640,7 +640,7 @@ public class Main extends Application {
     private void checkInvincibility() {
         if ((System.currentTimeMillis() - lastDestroyedTime > SHIP_INVINCIBLE_TIME)) {
             ship.setInvincibility(false);
-            ship.getShape().setFill(Color.WHITE);
+            ship.getShape().setFill(Color.YELLOW);
         }
     }
 
@@ -811,6 +811,7 @@ public class Main extends Application {
 
                 projectile.accelerate();
                 projectile.setMovement(projectile.getMovement().normalize().multiply(3));
+                projectile.getShape().setFill(Color.YELLOW);
                 pane.getChildren().add(projectile.getShape());
 
                 // play sound
