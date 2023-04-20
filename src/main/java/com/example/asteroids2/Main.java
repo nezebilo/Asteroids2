@@ -21,11 +21,14 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.*;
 import java.util.*;
@@ -95,7 +98,43 @@ public class Main extends Application {
     private String[][] scores;
 
     // Load the custom font
-    Font customFont = Font.loadFont(new FileInputStream("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
+    static Font customFont = Font.loadFont(new FileInputStream("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
+
+
+    // set the font
+    static {
+        try {
+            customFont = Font.loadFont(new FileInputStream
+                    ("src/main/resources/imageAndFont/Roboto-BoldItalic.ttf"), 18);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Load background music
+    String musicFile = "src/main/resources/sfx/Enigma-Long-Version-Complete-Version.mp3";
+
+    Media sound = new Media(new File(musicFile).toURI().toString());
+    MediaPlayer music = new MediaPlayer(sound);
+
+    // Load fire sound effect
+    String fireSFXFile = "src/main/resources/sfx/mixkit-laser-gun-shot-3110.wav";
+
+    Media fireSFXSound = new Media(new File(fireSFXFile).toURI().toString());
+    MediaPlayer fireSFX = new MediaPlayer(fireSFXSound);
+
+    // Load explosion sound effect
+    String explodeSFXFile = "src/main/resources/sfx/mixkit-arcade-chiptune-explosion-1691.wav";
+
+    Media explodeSFXSound = new Media(new File(explodeSFXFile).toURI().toString());
+    MediaPlayer explodeSFX = new MediaPlayer(explodeSFXSound);
+
+    // Load jump sound effect
+    String jumpSFXFile = "src/main/resources/sfx/mixkit-space-deploy-whizz-3003.wav";
+
+    Media jumpSFXSound = new Media(new File(jumpSFXFile).toURI().toString());
+    MediaPlayer jumpSFX = new MediaPlayer(jumpSFXSound);
+
 
     public Main() throws FileNotFoundException {
     }
@@ -116,19 +155,31 @@ public class Main extends Application {
         Button highScoreBtn = new Button("High Score List");
         highScoreBtn.setFont(customFont);
 
+        // GAME TITLE
+        Text gameTitleText = new Text("Asteroids");
+        gameTitleText.setFont(Font.font("Arial", FontWeight.BOLD, 50));
+        gameTitleText.setFill(Color.BLACK);
+
+
+        // Playing instruction
+        Text platingInstruction = playInstructionSetting();
+
         // Create the main menu layout
-        VBox mainMenuLayout = new VBox(20, startBtn, quitBtn, highScoreBtn);
+        VBox mainMenuLayout = new VBox(20, gameTitleText, startBtn, quitBtn, highScoreBtn, platingInstruction);
         mainMenuLayout.setAlignment(Pos.CENTER);
 
         // Create a StackPane to hold the background and menu layout
         root = new StackPane();
+
+
         root.getChildren().addAll(backgroundView, mainMenuLayout);
 
+
         // Create the main menu scene
-        mainMenuScene = new Scene(root, 400, 300);
+        mainMenuScene = new Scene(root, 400, 340);
         //stage > scene > pane
         //game pane
-        primaryStage.setTitle("Game Title");
+        primaryStage.setTitle("Asteroids");
         primaryStage.setScene(mainMenuScene);
         primaryStage.show();
 
@@ -141,9 +192,20 @@ public class Main extends Application {
         });
     }
 
+    private static Text playInstructionSetting() {
+        Text platingInstruction = new Text("""
+                               Gameplay introduction:
+                    UP: acceleration    DOWN: deceleration
+                         LEFT & RIGHT: rotate   B: brake
+                        SPACE: fire   J: jump   ESC: pause\
+                """);
+        platingInstruction.setFill(Color.WHITE);
+        return platingInstruction;
+    }
+
     private void highScoreMenu() throws IOException {
         // Create the game over pane
-        ImageView highScoreBg = ButtonMenu.getBackgroundView("/imageAndFont/mainGameBackground.jpg", 400, 300);
+        ImageView highScoreBg = ButtonMenu.getBackgroundView("/imageAndFont/mainGameBackground.jpg", 400, 340);
 
         Pane highscorePane = new Pane();
 
@@ -263,7 +325,7 @@ public class Main extends Application {
         return startBtn;
     }
 
-    private void mainGameScene(Stage primaryStage) {
+    private  void mainGameScene(Stage primaryStage){
         ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/mainGameBackground.jpg", WIDTH, HEIGHT);
         ImageView boxView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", WIDTH, HEIGHT);
 
@@ -280,11 +342,38 @@ public class Main extends Application {
         mainGamePane.getChildren().addAll(backgroundView, pane);
 
         infoLabel = new Label("  Score: " + currentPoints + "  \n  Life: " + (ship.getLives() + 1) + "\n  Level: " + changeLevel());
+        infoLabel = new Label("  Score: "+ currentPoints +"  \n  Life: " +
+                (ship.getLives()+1) +  "\n  Level: " + changeLevel());
         // Set the font color to white
         infoLabel.setTextFill(Color.WHITE);
         infoLabel.setFont(customFont);
 
+        Label playInstructMainMenu = new Label("""
+                   UP: acceleration
+                   DOWN: brake
+                   B: brake
+                   LEFT & RIGHT: rotate
+                   SPACE: fire
+                   J: jump(3sCD)
+                   ESC: pause\
+                """);
+        playInstructMainMenu.setTextFill(Color.WHITE);
+        playInstructMainMenu.setLayoutY(485);
+        playInstructMainMenu.setLayoutX(0);
+
+
+
         pane.getChildren().add(infoLabel);
+        pane.getChildren().add(playInstructMainMenu);
+
+        // Set music to loop
+        music.setOnEndOfMedia(new Runnable() {
+            public void run() {
+                music.seek(Duration.ZERO);
+            }
+        });
+        // Start game music
+        music.play();
 
 
         scene = new Scene(mainGamePane);
@@ -340,6 +429,9 @@ public class Main extends Application {
     private void gameOver(Stage primaryStage, AnimationTimer animationTimer) {
 
         ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", 350, 250);
+
+        // Stop the music
+        music.stop();
 
         // Stop the animation timer
         animationTimer.stop();
@@ -519,6 +611,10 @@ public class Main extends Application {
 
     private void checkCollisionOfShip(FlyingObject obj, Stage primaryStage, AnimationTimer getAnimationTimer) throws Exception {
         if (ship.collide(obj) && ship.getLives() == 0 && !ship.isInvincibility()) {
+            // play explosion sound
+            explodeSFX.play();
+            // rewind explosion sound to beginning
+            explodeSFX.seek(Duration.ZERO);
             gameOver(primaryStage, getAnimationTimer);
         } else if (ship.collide(obj) && !ship.isInvincibility()) {
             lastDestroyedTime = System.currentTimeMillis();
@@ -534,6 +630,10 @@ public class Main extends Application {
             //Change the colour of the reborn ship
             ship.getShape().setFill(Color.RED);
             pane.getChildren().add(ship.getShape());
+            // play explosion sound
+            explodeSFX.play();
+            // rewind explosion sound to beginning
+            explodeSFX.seek(Duration.ZERO);
         }
     }
 
@@ -590,6 +690,7 @@ public class Main extends Application {
         }
     }
 
+
     private void createAliens(Pane pane) {
         //if a random number is less 0.005, a new aliens will be added to the window.
         if (Math.random() < CREATED_PROBABILITY && (aliens.size() <= ALIEN_EXISTING_MAXIMUM)) {
@@ -632,6 +733,7 @@ public class Main extends Application {
             ship.turnRight();
         }
 
+
         //speed = length / time
         //length = square (x-axis ** 2 + y-axis ** 2)
         //time: The number of times the AnimationTimer refreshes the screen per second
@@ -649,6 +751,13 @@ public class Main extends Application {
             if (speed >= 0) {
                 ship.setMovement(new Point2D(0, 0));
             }
+            if (speed < 200){
+                ship.decelerate();
+            }
+        }
+        // Brake
+        if (pressedKeys.getOrDefault(KeyCode.B, false)) {
+                ship.setMovement(new Point2D(0,0));
         }
 
         if (pressedKeys.getOrDefault(KeyCode.J, false)) {
@@ -664,6 +773,10 @@ public class Main extends Application {
                 //only a thrust has successfully occurred, we record the time
                 lastThrustTime = System.currentTimeMillis();
                 pane.getChildren().add(ship.getShape());
+                // play jump sound
+                jumpSFX.play();
+                // rewind jump sound to beginning
+                jumpSFX.seek(Duration.ZERO);
             }
         }
 
@@ -704,6 +817,11 @@ public class Main extends Application {
                 projectile.accelerate();
                 projectile.setMovement(projectile.getMovement().normalize().multiply(3));
                 pane.getChildren().add(projectile.getShape());
+
+                // play sound
+                fireSFX.play();
+                // return sound to beginning
+                fireSFX.seek(Duration.ZERO);
             }
         }
         //make all projectiles move
@@ -725,6 +843,7 @@ public class Main extends Application {
                         )));
 
                 alienProjectiles.add(alienprojectile);
+
 
                 alienprojectile.accelerate();
                 alienprojectile.setMovement(alienprojectile.getMovement().normalize().multiply(3));
@@ -826,6 +945,10 @@ public class Main extends Application {
                     //it mean that the status objects marked as false should be deleted
                     projectile.setIsALive(false);
                     asteroid.setIsALive(false);
+                    // play explosion sound
+                    explodeSFX.play();
+                    // rewind explosion sound to beginning
+                    explodeSFX.seek(Duration.ZERO);
                 }
             });
             //check projectiles and aliens
@@ -837,6 +960,10 @@ public class Main extends Application {
                     //it mean that the status objects marked as false should be deleted
                     projectile.setIsALive(false);
                     alien.setIsALive(false);
+                    // play explosion sound
+                    explodeSFX.play();
+                    // rewind explosion sound to beginning
+                    explodeSFX.seek(Duration.ZERO);
                 }
             });
         });
@@ -906,6 +1033,7 @@ public class Main extends Application {
     //make all asteroids can move
     private void moveObjects() {
         asteroids.forEach(Asteroid::move);
+//        projectiles.forEach(projectile -> projectile.move());
         aliens.forEach(FlyingObject::move);
     }
 
