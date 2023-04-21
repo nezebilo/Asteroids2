@@ -42,19 +42,20 @@ import static com.example.asteroids2.MenuUi.LayoutElement.*;
 
 
 public class Main extends Application {
-    protected Pane pane;
-    protected Scene scene;
-
+    protected Pane mainGamePane;
+    protected Scene mainGameScene;
+    protected Scene mainMenuScene;
+    private Pane pauseMenuPane;
+    private StackPane mainMenuContainer;
+    private StackPane pauseMenuContainer;
     protected double startTime;
     protected int currentPoints;
-
     protected int lastPoints;
-    protected Map<KeyCode, Boolean> pressedKeys = new HashMap<>();
-    public static int WIDTH = 600;
-    public static int HEIGHT = 600;
+    private String[][] scores;
+
 
     protected Ship ship;
-
+    protected Map<KeyCode, Boolean> pressedKeys = new HashMap<>();
     protected List<Asteroid> asteroids = new ArrayList<>();
     protected List<Alien> aliens = new ArrayList<>();
     protected List<Projectile> projectiles = new ArrayList<>();
@@ -67,6 +68,8 @@ public class Main extends Application {
     protected double alienLastFireTime;
     protected double lastThrustTime;
 
+    public static int WIDTH = 600;
+    public static int HEIGHT = 600;
     protected static final int SHIP_FIRE_INTERVAL = 500; // ms
     protected static final int ALIEN_FIRE_INTERVAL = 5000; // ms
     protected static final int SHIP_THRUST_INTERVAL = 3000; // ms
@@ -77,20 +80,11 @@ public class Main extends Application {
     protected static final int SHIP_PROJECTILE_EXIST_MAXIMUM = 5;
     protected static final double CREATED_PROBABILITY = 0.001;
 
-
     protected Random random = new Random();
-    protected Scene mainMenuScene;
-    private Pane pauseMenuPane;
-
-    private StackPane pauseMenuContainer;
     private boolean isPaused = false;
-    private StackPane root;
     private Label infoLabel;
-    private String[][] scores;
-
     // Load the custom font
     static Font customFont;
-
 
     // set the font
     static {
@@ -130,6 +124,7 @@ public class Main extends Application {
         mainMenuScene(primaryStage);
     }
 
+    //  main menu mainGameScene / game mainGameScene/ high score mainGamePane/ pause mainGamePane/game over mainGamePane
     private void mainMenuScene(Stage primaryStage) {
         // Create the "Start Game" button with the custom image
         Button startBtn = getStartButton(primaryStage, gameStartFunction);
@@ -153,34 +148,32 @@ public class Main extends Application {
         // Create a StackPane to hold the background and menu layout
         GamePane tempPane = new GamePane(400, 340, "/imageAndFont/box.png");
         tempPane.setBg(mainMenuLayout);
-        root = tempPane.getContainer();
+        mainMenuContainer = tempPane.getContainer();
 
-        // Create the main menu scene
-        mainMenuScene = new Scene(root, 400, 340);
+        // Create the main menu mainGameScene
+        mainMenuScene = new Scene(mainMenuContainer, 400, 340);
 
-        //stage > scene > pane
+        //stage > mainGameScene > mainGamePane
         primaryStage.setTitle("Asteroids");
         primaryStage.setScene(mainMenuScene);
         primaryStage.show();
     }
-
-    //  main menu scene / game scene/ high score pane/ pause pane/game over pane
     private void mainGameScene(Stage primaryStage){
         GamePane tempPane = new GamePane(WIDTH, HEIGHT, "/imageAndFont/mainGameBackground.jpg");
         tempPane.setPosition(WIDTH, HEIGHT);
 
-        pane = tempPane.getPane();
+        mainGamePane = tempPane.getPane();
 
         //record the start time of this game
         startTime = System.currentTimeMillis();
 
-        //add roles to pane
-        addRoles(pane);
+        //add roles to mainGamePane
+        addRoles(mainGamePane);
 
-        // Create a StackPane to hold the background and game pane
+        // Create a StackPane to hold the background and game mainGamePane
         tempPane.setBg();
 
-        // set text info into main game pane
+        // set text info into main game mainGamePane
         mainGameTextInfo();
 
         // Set music to loop
@@ -188,16 +181,16 @@ public class Main extends Application {
         // Start game music
         music.play();
 
-        scene = new Scene(tempPane.getTempPane());
-        primaryStage.setScene(scene);
+        mainGameScene = new Scene(tempPane.getTempPane());
+        primaryStage.setScene(mainGameScene);
     }
     private void highScoreMenu() throws IOException {
 
         GamePane highScorePane = new GamePane(400, 340, "/imageAndFont/mainGameBackground.jpg");
-        // Create the game over pane
-        highScorePane.setBg(root);
+        // Create the game over mainGamePane
+        highScorePane.setBg(mainMenuContainer);
 
-        Button mainMenuBtn = LayoutElement.getMenuBtn(root, highScorePane.getContainer());
+        Button mainMenuBtn = LayoutElement.getMenuBtn(mainMenuContainer, highScorePane.getContainer());
 
         highScorePane.addElement(mainMenuBtn);
 
@@ -221,7 +214,7 @@ public class Main extends Application {
         highScorePane.addElement(highScoreListView);
     }
     private void gameOver(Stage primaryStage, AnimationTimer animationTimer) {
-        GamePane tempPane = new GamePane(350, 250, "/imageAndFont/box.png", pane);
+        GamePane tempPane = new GamePane(350, 250, "/imageAndFont/box.png", mainGamePane);
 
         // Stop the music
         music.stop();
@@ -233,9 +226,9 @@ public class Main extends Application {
         Button restartBtn = getRestartBtn(primaryStage, restartFunction);
 
         // Create the "Back to Main Menu" button
-        Button mainMenuBtn = LayoutElement.getMainMenuBtn(primaryStage, tempPane.getPane(), pane, mainMenuScene);
+        Button mainMenuBtn = LayoutElement.getMainMenuBtn(primaryStage, tempPane.getPane(), mainGamePane, mainMenuScene);
 
-        // Add buttons to the game over pane
+        // Add buttons to the game over mainGamePane
         tempPane.getPane().getChildren().addAll(restartBtn, mainMenuBtn);
 
         // gameOverText
@@ -248,12 +241,12 @@ public class Main extends Application {
         // code to ask the player to enter a name
         askForPlayerName();
 
-        // Add the game over pane to the game pane
-        pane.getChildren().add(tempPane.getPane());
+        // Add the game over mainGamePane to the game mainGamePane
+        mainGamePane.getChildren().add(tempPane.getPane());
     }
     private void showPauseMenu(Stage primaryStage, AnimationTimer getAnimationTimer) {
 
-        GamePane pausePane = new GamePane(300, 200, "/imageAndFont/box.png", pane);
+        GamePane pausePane = new GamePane(300, 200, "/imageAndFont/box.png", mainGamePane);
 
         pauseMenuPane = pausePane.getPane();
         pauseMenuContainer = pausePane.getContainer();
@@ -264,7 +257,7 @@ public class Main extends Application {
         pausePane.addElement(resumeBtn);
         pausePane.addElement(quitGameBtn);
 
-        pane.getChildren().add(pauseMenuPane);
+        mainGamePane.getChildren().add(pauseMenuPane);
     }
 
 
@@ -275,26 +268,25 @@ public class Main extends Application {
             highScores = FXCollections.observableArrayList("no scores");
         } else {
             // sort the scores
-            sortTheScores();
+            Arrays.sort(scores, (o1, o2) -> Integer.parseInt(o2[1]) - Integer.parseInt(o1[1]));
 
             List<String> scoresList = new ArrayList<>();
             if (scores.length < 5) {
                 for (int i = 0; i < scores.length; i++) {
                     scoresList.add("No." + (i + 1) + "-" + scores[i][0] + "-" + scores[i][1]);
                 }
-                // Add some test high scores to the list
+
             } else {
                 for (int i = 0; i < 5; i++) {
                     scoresList.add("No." + (i + 1) + "-" + scores[i][0] + "-" + scores[i][1]);
                 }
             }
+            // Add some test high scores to the list
             highScores = FXCollections.observableArrayList(scoresList);
         }
         return highScores;
     }
-    private void sortTheScores() {
-        Arrays.sort(scores, (o1, o2) -> Integer.parseInt(o2[1]) - Integer.parseInt(o1[1]));
-    }
+
     private void readFile() throws IOException {
         FileReader highScoreFile = new FileReader("src/main/java/com/example/asteroids2/highScores.txt");
         BufferedReader bufferedReader = new BufferedReader(highScoreFile);
@@ -328,8 +320,8 @@ public class Main extends Application {
         playInstructMainMenu.setLayoutY(485);
         playInstructMainMenu.setLayoutX(0);
 
-        pane.getChildren().add(infoLabel);
-        pane.getChildren().add(playInstructMainMenu);
+        mainGamePane.getChildren().add(infoLabel);
+        mainGamePane.getChildren().add(playInstructMainMenu);
     }
     private void askForPlayerName() {
         Platform.runLater(() -> {
@@ -378,7 +370,7 @@ public class Main extends Application {
         escToPause(primaryStage, getAnimationTimer);
     }
     private void escToPause(Stage primaryStage, AnimationTimer getAnimationTimer) {
-        scene.addEventHandler(KeyEvent.KEY_PRESSED, e3 -> {
+        mainGameScene.addEventHandler(KeyEvent.KEY_PRESSED, e3 -> {
             if (e3.getCode() == KeyCode.ESCAPE) {
                 if (!isPaused) {
                     getAnimationTimer.stop();
@@ -386,8 +378,8 @@ public class Main extends Application {
                     // Show pause menu
                     showPauseMenu(primaryStage, getAnimationTimer);
                 } else {
-                    pane.getChildren().remove(pauseMenuPane);
-                    pane.getChildren().remove(pauseMenuContainer);
+                    mainGamePane.getChildren().remove(pauseMenuPane);
+                    mainGamePane.getChildren().remove(pauseMenuContainer);
                     isPaused = false;
                     getAnimationTimer.start();
                 }
@@ -421,6 +413,7 @@ public class Main extends Application {
 
     // button click events
     Consumer<Stage> gameStartFunction = primaryStage -> {
+        //reset
         asteroids = new ArrayList<>();
         aliens = new ArrayList<>();
         projectiles = new ArrayList<>();
@@ -442,8 +435,8 @@ public class Main extends Application {
         }
     };
     Consumer<Stage> resumeFunction = primaryStage -> {
-        pane.getChildren().remove(pauseMenuPane);
-        pane.getChildren().remove(pauseMenuContainer);
+        mainGamePane.getChildren().remove(pauseMenuPane);
+        mainGamePane.getChildren().remove(pauseMenuContainer);
         isPaused = false;
     };
     Consumer<Stage> restartFunction = this::startNewGame;
@@ -457,8 +450,8 @@ public class Main extends Application {
             public void handle(long now) {
 
                 //Continuous generation of asteroids and aliens
-                createAsteroids(pane);
-                createAliens(pane);
+                createAsteroids(mainGamePane);
+                createAliens(mainGamePane);
                 //control ship, turning direction, going forward
                 controlShip();
                 checkInvincibility();
@@ -502,9 +495,9 @@ public class Main extends Application {
             gameOver(primaryStage, getAnimationTimer);
         } else if (ship.collide(obj) && !ship.isInvincibility()) {
             lastDestroyedTime = System.currentTimeMillis();
-            pane.getChildren().remove(obj.getShape());
+            mainGamePane.getChildren().remove(obj.getShape());
             obj.setIsALive(false);
-            pane.getChildren().remove(ship.getShape());
+            mainGamePane.getChildren().remove(ship.getShape());
             //increase the number of death
             int temp = ship.getLives() - 1;
             //change the location ship in the center of window
@@ -513,7 +506,7 @@ public class Main extends Application {
             ship.setLives(temp);
             //Change the colour of the reborn ship
             ship.getShape().setFill(Color.RED);
-            pane.getChildren().add(ship.getShape());
+            mainGamePane.getChildren().add(ship.getShape());
             // play explosion sound
             explodeSFX.play();
             // rewind explosion sound to beginning
@@ -529,7 +522,7 @@ public class Main extends Application {
     }
 
     private void addRoles(Pane pane) {
-        //create ship and add it to pane
+        //create ship and add it to mainGamePane
         ship = new Ship(WIDTH / 2, HEIGHT / 2);
         //set the ship invincible
         ship.setInvincibility(true);
@@ -600,9 +593,9 @@ public class Main extends Application {
     }
 
     private void controlShip() {
-        scene.setOnKeyPressed(event ->  pressedKeys.put(event.getCode(), Boolean.TRUE));
+        mainGameScene.setOnKeyPressed(event ->  pressedKeys.put(event.getCode(), Boolean.TRUE));
 
-        scene.setOnKeyReleased(event ->  pressedKeys.put(event.getCode(), Boolean.FALSE));
+        mainGameScene.setOnKeyReleased(event ->  pressedKeys.put(event.getCode(), Boolean.FALSE));
 
         if (pressedKeys.getOrDefault(KeyCode.LEFT, false)) {
             ship.turnLeft();
@@ -637,8 +630,8 @@ public class Main extends Application {
         if (pressedKeys.getOrDefault(KeyCode.J, false)) {
             //per 3 seconds, ship can use one time
             if ((System.currentTimeMillis() - lastThrustTime) > SHIP_THRUST_INTERVAL) {
-                //remove the shape of ship from pane
-                pane.getChildren().remove(ship.getShape());
+                //remove the shape of ship from mainGamePane
+                mainGamePane.getChildren().remove(ship.getShape());
                 //using while loop until find a proper position
                 ship.thrust(random.nextInt(WIDTH), random.nextInt(HEIGHT));
                 while (thrustCheckAsteroid() && thrustCheckAlien()) {
@@ -646,7 +639,7 @@ public class Main extends Application {
                 }
                 //only a thrust has successfully occurred, we record the time
                 lastThrustTime = System.currentTimeMillis();
-                pane.getChildren().add(ship.getShape());
+                mainGamePane.getChildren().add(ship.getShape());
                 // play jump sound
                 jumpSFX.play();
                 // rewind jump sound to beginning
@@ -691,7 +684,7 @@ public class Main extends Application {
                 projectile.accelerate();
                 projectile.setMovement(projectile.getMovement().normalize().multiply(3));
                 projectile.getShape().setFill(Color.YELLOW);
-                pane.getChildren().add(projectile.getShape());
+                mainGamePane.getChildren().add(projectile.getShape());
 
                 // play sound
                 fireSFX.play();
@@ -723,7 +716,7 @@ public class Main extends Application {
                 alienprojectile.accelerate();
                 alienprojectile.setMovement(alienprojectile.getMovement().normalize().multiply(3));
                 alienprojectile.getShape().setFill(Color.RED);
-                pane.getChildren().add(alienprojectile.getShape());
+                mainGamePane.getChildren().add(alienprojectile.getShape());
             });
         }
 
@@ -754,14 +747,14 @@ public class Main extends Application {
         //remove all dead projectiles and asteroids from the window
         projectiles.stream()
                 .filter(projectile -> !projectile.getIsALive())  //the statement returns a stream which includes the dead projectiles
-                .forEach(projectile -> pane.getChildren().remove(projectile.getShape()));//remove the shape of  every dead projectile
+                .forEach(projectile -> mainGamePane.getChildren().remove(projectile.getShape()));//remove the shape of  every dead projectile
         alienProjectiles.stream()
                 .filter(alienProjectile -> !alienProjectile.getIsALive())  //the statement returns a stream which includes the dead projectiles
-                .forEach(alienProjectile -> pane.getChildren().remove(alienProjectile.getShape()));
+                .forEach(alienProjectile -> mainGamePane.getChildren().remove(alienProjectile.getShape()));
         asteroids.stream()
                 .filter(asteroid -> !asteroid.getIsALive())
                 .forEach(asteroid -> {
-                    pane.getChildren().remove(asteroid.getShape());
+                    mainGamePane.getChildren().remove(asteroid.getShape());
                     //For each asteroid destroyed, the player gains ten points
                     //bonus score can be set up in 'addAndGet' by change the parameter.
                     if (asteroid.getSize() == SMALL.setSize()) {
@@ -785,7 +778,7 @@ public class Main extends Application {
         aliens.stream()
                 .filter(alien -> !alien.getIsALive())
                 .forEach(alien -> {
-                    pane.getChildren().remove(alien.getShape());
+                    mainGamePane.getChildren().remove(alien.getShape());
                     currentPoints += 2000;
                     lastPoints += 2000;
                     showGameInfo();
@@ -870,7 +863,7 @@ public class Main extends Application {
                                     asteroid.getSize() - 1, asteroid.getSpeedTimes() - 1);
                             if (!newAsteroid.collide(ship)) {
                                 smallerAsteroids.add(newAsteroid);
-                                pane.getChildren().add(newAsteroid.getShape());
+                                mainGamePane.getChildren().add(newAsteroid.getShape());
                                 temp += 1;
                             }
                         }
