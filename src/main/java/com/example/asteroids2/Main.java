@@ -185,13 +185,12 @@ public class Main extends Application {
         primaryStage.setScene(mainGameScene);
     }
     private void highScoreMenu() throws IOException {
-
+        // Create the high score Pane
         GamePane highScorePane = new GamePane(400, 340, "/imageAndFont/mainGameBackground.jpg");
-        // Create the game over mainGamePane
         highScorePane.setBg(mainMenuContainer);
 
+        // Create the back main Menu Btn
         Button mainMenuBtn = LayoutElement.getMenuBtn(mainMenuContainer, highScorePane.getContainer());
-
         highScorePane.addElement(mainMenuBtn);
 
         // Create a ListView to display the high scores
@@ -203,7 +202,6 @@ public class Main extends Application {
 
         //create the showing content
         highScores = highScoreListContent();
-
         highScoreListView.setItems(highScores);
 
         // Set the size and position of the list view
@@ -214,7 +212,8 @@ public class Main extends Application {
         highScorePane.addElement(highScoreListView);
     }
     private void gameOver(Stage primaryStage, AnimationTimer animationTimer) {
-        GamePane tempPane = new GamePane(350, 250, "/imageAndFont/box.png", mainGamePane);
+        // Create the game over Pane
+        GamePane gameOverPane = new GamePane(350, 250, "/imageAndFont/box.png", mainGamePane);
 
         // Stop the music
         music.stop();
@@ -226,31 +225,33 @@ public class Main extends Application {
         Button restartBtn = getRestartBtn(primaryStage, restartFunction);
 
         // Create the "Back to Main Menu" button
-        Button mainMenuBtn = LayoutElement.getMainMenuBtn(primaryStage, tempPane.getPane(), mainGamePane, mainMenuScene);
+        Button mainMenuBtn = LayoutElement.getMainMenuBtn(primaryStage, gameOverPane.getPane(), mainGamePane, mainMenuScene);
 
         // Add buttons to the game over mainGamePane
-        tempPane.getPane().getChildren().addAll(restartBtn, mainMenuBtn);
+        gameOverPane.getPane().getChildren().addAll(restartBtn, mainMenuBtn);
 
         // gameOverText
-        addTextToPane(tempPane.getPane(), "Game  Over", 75, 60, 30);
+        addTextToPane(gameOverPane.getPane(), "Game  Over", 75, 60, 30);
 
         // scoreText
-        addTextToPane(tempPane.getPane(), "Your Score: " + currentPoints,
+        addTextToPane(gameOverPane.getPane(), "Your Score: " + currentPoints,
                 110, 95, 16);
 
         // code to ask the player to enter a name
         askForPlayerName();
 
         // Add the game over mainGamePane to the game mainGamePane
-        mainGamePane.getChildren().add(tempPane.getPane());
+        mainGamePane.getChildren().add(gameOverPane.getPane());
     }
     private void showPauseMenu(Stage primaryStage, AnimationTimer getAnimationTimer) {
-
+        // creat pause Pane
         GamePane pausePane = new GamePane(300, 200, "/imageAndFont/box.png", mainGamePane);
 
+        // assign them to the global variable, point to same address
         pauseMenuPane = pausePane.getPane();
         pauseMenuContainer = pausePane.getContainer();
 
+        // add buttons
         Button resumeBtn = getResumeBtn(getAnimationTimer, resumeFunction, pauseMenuPane);
         Button quitGameBtn = LayoutElement.getQuitGameBtn(primaryStage,pausePane.getPane());
 
@@ -269,19 +270,18 @@ public class Main extends Application {
         } else {
             // sort the scores
             Arrays.sort(scores, (o1, o2) -> Integer.parseInt(o2[1]) - Integer.parseInt(o1[1]));
-
+            // text list
             List<String> scoresList = new ArrayList<>();
             if (scores.length < 5) {
                 for (int i = 0; i < scores.length; i++) {
                     scoresList.add("No." + (i + 1) + "-" + scores[i][0] + "-" + scores[i][1]);
                 }
-
             } else {
                 for (int i = 0; i < 5; i++) {
                     scoresList.add("No." + (i + 1) + "-" + scores[i][0] + "-" + scores[i][1]);
                 }
             }
-            // Add some test high scores to the list
+            // Add test high scores to the list
             highScores = FXCollections.observableArrayList(scoresList);
         }
         return highScores;
@@ -334,10 +334,11 @@ public class Main extends Application {
                 String name = result.get();
                 // record the score with the name
                 if (!name.equals("")) {
+                    // replace blank space
                     recordNameScore(name.replace(" ", "_"));
                 } else {
                     name = "Unknown";
-                    recordNameScore(name.replace(" ", "_"));
+                    recordNameScore(name);
                 }
             }
         });
