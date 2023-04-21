@@ -36,6 +36,8 @@ public class Alien extends FlyingObject {
 
         //control the speed of a created alien
         getAccelerationAmount(speedTimes);
+        // set timer to 0
+        this.timer = 0;
     }
 
     public void getAccelerationAmount(int num) {
