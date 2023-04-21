@@ -286,7 +286,6 @@ public class Main extends Application {
         }
         return highScores;
     }
-
     private void readFile() throws IOException {
         FileReader highScoreFile = new FileReader("src/main/java/com/example/asteroids2/highScores.txt");
         BufferedReader bufferedReader = new BufferedReader(highScoreFile);
