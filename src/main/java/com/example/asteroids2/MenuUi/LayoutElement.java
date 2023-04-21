@@ -36,19 +36,15 @@ public class LayoutElement {
         return quitBtn;
     }
 
-
     public static Button getQuitGameBtn(Stage primaryStage, Pane pauseMenuPane) {
         Button quitGameBtn = new Button("Quit Game");
         quitGameBtn.setFont(customFont);
 
-        quitGameBtn.setOnAction(e -> {
-            primaryStage.close();
-        });
+        quitGameBtn.setOnAction(e ->  primaryStage.close());
         quitGameBtn.setLayoutX((pauseMenuPane.getPrefWidth() - quitGameBtn.getWidth()) / 3);
         quitGameBtn.setLayoutY((pauseMenuPane.getPrefHeight() - quitGameBtn.getHeight()) / 1.8);
         return quitGameBtn;
     }
-
 
     public static Button getMainMenuBtn(Stage primaryStage, Pane gameOverPane, Pane pane, Scene mainMenuScene) {
         Button mainMenuBtn = new Button("Back to Main Menu");
@@ -63,7 +59,6 @@ public class LayoutElement {
         return mainMenuBtn;
     }
 
-
     public static ImageView getBackgroundView(String name, int v, int v1) {
         Image backgroundImg = new Image(Objects.requireNonNull(LayoutElement.class.getResourceAsStream(name)));
         ImageView backgroundView = new ImageView(backgroundImg);
@@ -75,9 +70,7 @@ public class LayoutElement {
     public static Button getMenuBtn(StackPane root, StackPane highScoreContainer) {
         Button mainMenuBtn = new Button("Back to Main Menu");
         mainMenuBtn.setFont(customFont);
-        mainMenuBtn.setOnAction(event -> {
-            root.getChildren().remove(highScoreContainer);
-        });
+        mainMenuBtn.setOnAction(event -> root.getChildren().remove(highScoreContainer));
         mainMenuBtn.setLayoutX(110);
         mainMenuBtn.setLayoutY(250);
         return mainMenuBtn;

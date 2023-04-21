@@ -56,11 +56,8 @@ public class Main extends Application {
     protected Ship ship;
 
     protected List<Asteroid> asteroids = new ArrayList<>();
-
     protected List<Alien> aliens = new ArrayList<>();
-
     protected List<Projectile> projectiles = new ArrayList<>();
-
     protected List<Projectile> alienProjectiles = new ArrayList<>();
 
 
@@ -125,12 +122,15 @@ public class Main extends Application {
     MediaPlayer jumpSFX = new MediaPlayer(jumpSFXSound);
 
 
-    public Main() throws FileNotFoundException {
+    public Main() {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
+        mainMenuScene(primaryStage);
+    }
 
+    private void mainMenuScene(Stage primaryStage) {
         // Create the "Start Game" button with the custom image
         Button startBtn = getStartButton(primaryStage, gameStartFunction);
 
@@ -164,7 +164,7 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    //  game scene/ high score scene/ pause scene/game over scene
+    //  main menu scene / game scene/ high score pane/ pause pane/game over pane
     private void mainGameScene(Stage primaryStage){
         GamePane tempPane = new GamePane(WIDTH, HEIGHT, "/imageAndFont/mainGameBackground.jpg");
         tempPane.setPosition(WIDTH, HEIGHT);
@@ -184,11 +184,7 @@ public class Main extends Application {
         mainGameTextInfo();
 
         // Set music to loop
-        music.setOnEndOfMedia(new Runnable() {
-            public void run() {
-                music.seek(Duration.ZERO);
-            }
-        });
+        music.setOnEndOfMedia(() -> music.seek(Duration.ZERO));
         // Start game music
         music.play();
 
@@ -226,7 +222,6 @@ public class Main extends Application {
     }
     private void gameOver(Stage primaryStage, AnimationTimer animationTimer) {
         GamePane tempPane = new GamePane(350, 250, "/imageAndFont/box.png", pane);
-
 
         // Stop the music
         music.stop();
@@ -298,12 +293,7 @@ public class Main extends Application {
         return highScores;
     }
     private void sortTheScores() {
-        Arrays.sort(scores, new Comparator<String[]>() {
-            @Override
-            public int compare(String[] o1, String[] o2) {
-                return Integer.parseInt(o2[1]) - Integer.parseInt(o1[1]);
-            }
-        });
+        Arrays.sort(scores, (o1, o2) -> Integer.parseInt(o2[1]) - Integer.parseInt(o1[1]));
     }
     private void readFile() throws IOException {
         FileReader highScoreFile = new FileReader("src/main/java/com/example/asteroids2/highScores.txt");
@@ -503,7 +493,7 @@ public class Main extends Application {
         };
     }
 
-    private void checkCollisionOfShip(FlyingObject obj, Stage primaryStage, AnimationTimer getAnimationTimer) throws Exception {
+    private void checkCollisionOfShip(FlyingObject obj, Stage primaryStage, AnimationTimer getAnimationTimer) {
         if (ship.collide(obj) && ship.getLives() == 0 && !ship.isInvincibility()) {
             // play explosion sound
             explodeSFX.play();
@@ -610,13 +600,9 @@ public class Main extends Application {
     }
 
     private void controlShip() {
-        scene.setOnKeyPressed(event -> {
-            pressedKeys.put(event.getCode(), Boolean.TRUE);
-        });
+        scene.setOnKeyPressed(event ->  pressedKeys.put(event.getCode(), Boolean.TRUE));
 
-        scene.setOnKeyReleased(event -> {
-            pressedKeys.put(event.getCode(), Boolean.FALSE);
-        });
+        scene.setOnKeyReleased(event ->  pressedKeys.put(event.getCode(), Boolean.FALSE));
 
         if (pressedKeys.getOrDefault(KeyCode.LEFT, false)) {
             ship.turnLeft();
