@@ -1,8 +1,10 @@
 package com.example.asteroids2;
 
+
 import com.example.asteroids2.ConstantVar.Level;
 import com.example.asteroids2.Flyingobject.*;
-import com.example.asteroids2.MenuUi.ButtonMenu;
+import com.example.asteroids2.MenuUi.LayoutElement;
+import com.example.asteroids2.MenuUi.GamePane;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -15,7 +17,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -32,23 +33,21 @@ import javafx.util.Duration;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static com.example.asteroids2.ConstantVar.Level.*;
 import static com.example.asteroids2.ConstantVar.Size.*;
 import static com.example.asteroids2.ConstantVar.SpeedRate.*;
+import static com.example.asteroids2.MenuUi.LayoutElement.*;
 
 
 public class Main extends Application {
     protected Pane pane;
-
     protected Scene scene;
 
     protected double startTime;
-
-    protected Text score;
-
     protected int currentPoints;
+
     protected int lastPoints;
     protected Map<KeyCode, Boolean> pressedKeys = new HashMap<>();
     public static int WIDTH = 600;
@@ -62,18 +61,14 @@ public class Main extends Application {
 
     protected List<Projectile> projectiles = new ArrayList<>();
 
-
     protected List<Projectile> alienProjectiles = new ArrayList<>();
 
 
     //record the last firing time, to control firing frequency
     protected double lastFireTime;
-
     protected double lastDestroyedTime;
-
     protected double alienLastFireTime;
     protected double lastThrustTime;
-    protected String currentLevel = "1";
 
     protected static final int SHIP_FIRE_INTERVAL = 500; // ms
     protected static final int ALIEN_FIRE_INTERVAL = 5000; // ms
@@ -87,11 +82,10 @@ public class Main extends Application {
 
 
     protected Random random = new Random();
-
     protected Scene mainMenuScene;
     private Pane pauseMenuPane;
+
     private StackPane pauseMenuContainer;
-    private StackPane gameOverContainer;
     private boolean isPaused = false;
     private StackPane root;
     private Label infoLabel;
@@ -113,25 +107,20 @@ public class Main extends Application {
 
     // Load background music
     String musicFile = "src/main/resources/sfx/Enigma-Long-Version-Complete-Version.mp3";
-
     Media sound = new Media(new File(musicFile).toURI().toString());
     MediaPlayer music = new MediaPlayer(sound);
 
     // Load fire sound effect
     String fireSFXFile = "src/main/resources/sfx/mixkit-laser-gun-shot-3110.wav";
-
     Media fireSFXSound = new Media(new File(fireSFXFile).toURI().toString());
     MediaPlayer fireSFX = new MediaPlayer(fireSFXSound);
 
     // Load explosion sound effect
     String explodeSFXFile = "src/main/resources/sfx/mixkit-arcade-chiptune-explosion-1691.wav";
-
     Media explodeSFXSound = new Media(new File(explodeSFXFile).toURI().toString());
     MediaPlayer explodeSFX = new MediaPlayer(explodeSFXSound);
-
     // Load jump sound effect
     String jumpSFXFile = "src/main/resources/sfx/mixkit-space-deploy-whizz-3003.wav";
-
     Media jumpSFXSound = new Media(new File(jumpSFXFile).toURI().toString());
     MediaPlayer jumpSFX = new MediaPlayer(jumpSFXSound);
 
@@ -142,24 +131,17 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        //Load the background image
-        ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", 400, 340);
-
         // Create the "Start Game" button with the custom image
-        Button startBtn = getStartButton(primaryStage);
+        Button startBtn = getStartButton(primaryStage, gameStartFunction);
 
         // Create the "Quit Game" button with the custom image
-        Button quitBtn = ButtonMenu.getQuitBtn(primaryStage, customFont);
+        Button quitBtn = LayoutElement.getQuitBtn(primaryStage);
 
-        // Create the "Quit Game" button
-        Button highScoreBtn = new Button("High Score List");
-        highScoreBtn.setFont(customFont);
+        // Create the "High Score List" button
+        Button highScoreBtn = getHignScoreButton(highScoreFunction);
 
         // GAME TITLE
-        Text gameTitleText = new Text("Asteroids");
-        gameTitleText.setFont(Font.font("Arial", FontWeight.BOLD, 50));
-        gameTitleText.setFill(Color.BLACK);
-
+        Text gameTitleText = getGameTitleText();
 
         // Playing instruction
         Text platingInstruction = playInstructionSetting();
@@ -169,57 +151,59 @@ public class Main extends Application {
         mainMenuLayout.setAlignment(Pos.CENTER);
 
         // Create a StackPane to hold the background and menu layout
-        root = new StackPane();
-
-
-        root.getChildren().addAll(backgroundView, mainMenuLayout);
-
+        GamePane tempPane = new GamePane(400, 340, "/imageAndFont/box.png");
+        tempPane.setBg(mainMenuLayout);
+        root = tempPane.getContainer();
 
         // Create the main menu scene
         mainMenuScene = new Scene(root, 400, 340);
+
         //stage > scene > pane
-        //game pane
         primaryStage.setTitle("Asteroids");
         primaryStage.setScene(mainMenuScene);
         primaryStage.show();
+    }
 
-        highScoreBtn.setOnAction(e -> {
-            try {
-                highScoreMenu();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
+    //  game scene/ high score scene/ pause scene/game over scene
+    private void mainGameScene(Stage primaryStage){
+        GamePane tempPane = new GamePane(WIDTH, HEIGHT, "/imageAndFont/mainGameBackground.jpg");
+        tempPane.setPosition(WIDTH, HEIGHT);
+
+        pane = tempPane.getPane();
+
+        //record the start time of this game
+        startTime = System.currentTimeMillis();
+
+        //add roles to pane
+        addRoles(pane);
+
+        // Create a StackPane to hold the background and game pane
+        tempPane.setBg();
+
+        // set text info into main game pane
+        mainGameTextInfo();
+
+        // Set music to loop
+        music.setOnEndOfMedia(new Runnable() {
+            public void run() {
+                music.seek(Duration.ZERO);
             }
         });
-    }
+        // Start game music
+        music.play();
 
-    private static Text playInstructionSetting() {
-        Text platingInstruction = new Text("""
-                                            How To Control:
-                            UP: Acceleration    DOWN: Deceleration
-                               LEFT & RIGHT: Rotate   B: Brake
-                        SPACE: Fire   J: Hyperspace Jump   ESC: Pause\
-                """);
-        platingInstruction.setFill(Color.WHITE);
-        return platingInstruction;
+        scene = new Scene(tempPane.getTempPane());
+        primaryStage.setScene(scene);
     }
-
     private void highScoreMenu() throws IOException {
+
+        GamePane highScorePane = new GamePane(400, 340, "/imageAndFont/mainGameBackground.jpg");
         // Create the game over pane
-        ImageView highScoreBg = ButtonMenu.getBackgroundView("/imageAndFont/mainGameBackground.jpg", 400, 340);
+        highScorePane.setBg(root);
 
-        Pane highscorePane = new Pane();
+        Button mainMenuBtn = LayoutElement.getMenuBtn(root, highScorePane.getContainer());
 
-        StackPane highScoreContainer = new StackPane();
-
-        containerSet(highScoreContainer, highScoreBg, highscorePane);
-
-        root.getChildren().add(highScoreContainer);
-
-        Button mainMenuBtn = ButtonMenu.getMenuBtn(customFont, root, highScoreContainer);
-
-        highscorePane.getChildren().addAll(mainMenuBtn);
-
-        highscorePane.setPrefSize(350, 250);
+        highScorePane.addElement(mainMenuBtn);
 
         // Create a ListView to display the high scores
         ListView<String> highScoreListView = new ListView<>();
@@ -228,6 +212,70 @@ public class Main extends Application {
         readFile();
         ObservableList<String> highScores;
 
+        //create the showing content
+        highScores = highScoreListContent();
+
+        highScoreListView.setItems(highScores);
+
+        // Set the size and position of the list view
+        highScoreListView.setLayoutX(120);
+        highScoreListView.setLayoutY(60);
+        highScoreListView.setPrefSize(150, 130);
+
+        highScorePane.addElement(highScoreListView);
+    }
+    private void gameOver(Stage primaryStage, AnimationTimer animationTimer) {
+        GamePane tempPane = new GamePane(350, 250, "/imageAndFont/box.png", pane);
+
+
+        // Stop the music
+        music.stop();
+
+        // Stop the animation timer
+        animationTimer.stop();
+
+        // Create the "Restart" button
+        Button restartBtn = getRestartBtn(primaryStage, restartFunction);
+
+        // Create the "Back to Main Menu" button
+        Button mainMenuBtn = LayoutElement.getMainMenuBtn(primaryStage, tempPane.getPane(), pane, mainMenuScene);
+
+        // Add buttons to the game over pane
+        tempPane.getPane().getChildren().addAll(restartBtn, mainMenuBtn);
+
+        // gameOverText
+        addTextToPane(tempPane.getPane(), "Game  Over", 75, 60, 30);
+
+        // scoreText
+        addTextToPane(tempPane.getPane(), "Your Score: " + currentPoints,
+                110, 95, 16);
+
+        // code to ask the player to enter a name
+        askForPlayerName();
+
+        // Add the game over pane to the game pane
+        pane.getChildren().add(tempPane.getPane());
+    }
+    private void showPauseMenu(Stage primaryStage, AnimationTimer getAnimationTimer) {
+
+        GamePane pausePane = new GamePane(300, 200, "/imageAndFont/box.png", pane);
+
+        pauseMenuPane = pausePane.getPane();
+        pauseMenuContainer = pausePane.getContainer();
+
+        Button resumeBtn = getResumeBtn(getAnimationTimer, resumeFunction, pauseMenuPane);
+        Button quitGameBtn = LayoutElement.getQuitGameBtn(primaryStage,pausePane.getPane());
+
+        pausePane.addElement(resumeBtn);
+        pausePane.addElement(quitGameBtn);
+
+        pane.getChildren().add(pauseMenuPane);
+    }
+
+
+    // menu need functions
+    private ObservableList<String> highScoreListContent() {
+        ObservableList<String> highScores;
         if (scores == null) {
             highScores = FXCollections.observableArrayList("no scores");
         } else {
@@ -240,29 +288,15 @@ public class Main extends Application {
                     scoresList.add("No." + (i + 1) + "-" + scores[i][0] + "-" + scores[i][1]);
                 }
                 // Add some test high scores to the list
-                highScores = FXCollections.observableArrayList(scoresList);
             } else {
                 for (int i = 0; i < 5; i++) {
                     scoresList.add("No." + (i + 1) + "-" + scores[i][0] + "-" + scores[i][1]);
                 }
-                highScores = FXCollections.observableArrayList(scoresList);
             }
-
-
+            highScores = FXCollections.observableArrayList(scoresList);
         }
-
-
-        highScoreListView.setItems(highScores);
-
-        // Set the size and position of the list view
-        highScoreListView.setLayoutX(120);
-        highScoreListView.setLayoutY(60);
-        highScoreListView.setPrefSize(150, 130);
-
-        highscorePane.getChildren().add(highScoreListView);
-
+        return highScores;
     }
-
     private void sortTheScores() {
         Arrays.sort(scores, new Comparator<String[]>() {
             @Override
@@ -271,7 +305,6 @@ public class Main extends Application {
             }
         });
     }
-
     private void readFile() throws IOException {
         FileReader highScoreFile = new FileReader("src/main/java/com/example/asteroids2/highScores.txt");
         BufferedReader bufferedReader = new BufferedReader(highScoreFile);
@@ -285,63 +318,7 @@ public class Main extends Application {
             }
         }
     }
-
-    private void containerSet(StackPane container, ImageView imgBg, Pane pane) {
-        container.getChildren().addAll(imgBg, pane);
-        container.setLayoutX(pane.getLayoutX());
-        container.setLayoutY(pane.getLayoutY());
-    }
-
-
-    private Pane getPane(ImageView backgroundView) {
-        Pane gameOverPane = new Pane();
-
-        gameOverPane.setPrefSize(350, 250);
-        gameOverPane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7); -fx-border-color: white; -fx-border-width: 2;");
-        gameOverPane.setLayoutX((pane.getPrefWidth() - gameOverPane.getPrefWidth()) / 2);
-        gameOverPane.setLayoutY((pane.getPrefHeight() - gameOverPane.getPrefHeight()) / 2);
-
-        // Create a StackPane to hold the background and pause menu pane
-        gameOverContainer = new StackPane();
-        containerSet(gameOverContainer, backgroundView, gameOverPane);
-
-        pane.getChildren().add(gameOverContainer);
-        return gameOverPane;
-    }
-
-    private Button getStartButton(Stage primaryStage) {
-        Button startBtn = new Button("Start Game");
-        startBtn.setFont(customFont);
-        startBtn.setOnAction(e -> {
-            mainGameScene(primaryStage);
-            AnimationTimer getAnimationTimer = getAnimationTimer(primaryStage);
-            getAnimationTimer.start();
-
-            primaryStage.show();
-
-            // Detect ESC key press event
-            escToPause(primaryStage, getAnimationTimer);
-        });
-        return startBtn;
-    }
-
-    private  void mainGameScene(Stage primaryStage){
-        ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/mainGameBackground.jpg", WIDTH, HEIGHT);
-        ImageView boxView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", WIDTH, HEIGHT);
-
-        // Code to start the game goes here
-        pane = new Pane();
-        pane.setPrefSize(WIDTH, HEIGHT);
-        //record the start time of this game
-        startTime = System.currentTimeMillis();
-        //add roles to pane
-        addRoles(pane);
-
-        // Create a StackPane to hold the background and game pane
-        Pane mainGamePane = new StackPane();
-        mainGamePane.getChildren().addAll(backgroundView, pane);
-
-        infoLabel = new Label("  Score: " + currentPoints + "  \n  Life: " + (ship.getLives() + 1) + "\n  Level: " + changeLevel());
+    private void mainGameTextInfo() {
         infoLabel = new Label("  Score: "+ currentPoints +"  \n  Life: " +
                 (ship.getLives()+1) +  "\n  Level: " + changeLevel());
         // Set the font color to white
@@ -354,117 +331,17 @@ public class Main extends Application {
                    B: Brake
                    LEFT & RIGHT: Rotate
                    SPACE: Fire
-                   J: Jump
+                   J: Hyperspace Jump
                    ESC: Pause Game\
                 """);
         playInstructMainMenu.setTextFill(Color.WHITE);
         playInstructMainMenu.setLayoutY(485);
         playInstructMainMenu.setLayoutX(0);
 
-
-
         pane.getChildren().add(infoLabel);
         pane.getChildren().add(playInstructMainMenu);
-
-        // Set music to loop
-        music.setOnEndOfMedia(new Runnable() {
-            public void run() {
-                music.seek(Duration.ZERO);
-            }
-        });
-        // Start game music
-        music.play();
-
-
-        scene = new Scene(mainGamePane);
-        primaryStage.setTitle("Asteroids Game");
-        primaryStage.setScene(scene);
-
-
     }
-
-
-    private void showPauseMenu(Stage primaryStage, AnimationTimer getAnimationTimer) {
-
-        ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", 300, 200);
-
-        pauseMenuPane = new Pane();
-        pauseMenuPane.setPrefSize(300, 200);
-        pauseMenuPane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7); -fx-border-color: white; -fx-border-width: 2;");
-        pauseMenuPane.setLayoutX((pane.getPrefWidth() - pauseMenuPane.getPrefWidth()) / 2);
-        pauseMenuPane.setLayoutY((pane.getPrefHeight() - pauseMenuPane.getPrefHeight()) / 2);
-
-        // Create a StackPane to hold the background and pause menu pane
-        pauseMenuContainer = new StackPane();
-        containerSet(pauseMenuContainer, backgroundView, pauseMenuPane);
-
-        pane.getChildren().add(pauseMenuContainer);
-
-        Button resumeBtn = getResumeBtn(getAnimationTimer);
-
-        pauseMenuPane.getChildren().add(resumeBtn);
-
-        Button quitGameBtn = ButtonMenu.getQuitGameBtn(primaryStage, customFont, pauseMenuPane);
-
-        pauseMenuPane.getChildren().add(quitGameBtn);
-
-        pane.getChildren().add(pauseMenuPane);
-    }
-
-
-    private Button getResumeBtn(AnimationTimer getAnimationTimer) {
-        Button resumeBtn = new Button("Resume Game");
-        resumeBtn.setFont(customFont);
-        resumeBtn.setOnAction(e -> {
-            pane.getChildren().remove(pauseMenuPane);
-            pane.getChildren().remove(pauseMenuContainer);
-            isPaused = false;
-            getAnimationTimer.start();
-        });
-        resumeBtn.setLayoutX((pauseMenuPane.getPrefWidth() - resumeBtn.getWidth()) / 3.5);
-        resumeBtn.setLayoutY((pauseMenuPane.getPrefHeight() - resumeBtn.getHeight()) / 4);
-        return resumeBtn;
-    }
-
-    private void gameOver(Stage primaryStage, AnimationTimer animationTimer) {
-
-        ImageView backgroundView = ButtonMenu.getBackgroundView("/imageAndFont/box.png", 350, 250);
-
-        // Stop the music
-        music.stop();
-
-        // Stop the animation timer
-        animationTimer.stop();
-
-        // Create the game over pane
-        Pane gameOverPane = getPane(backgroundView);
-
-        // Create the "Restart" button
-        Button restartBtn = getRestartBtn(primaryStage, gameOverPane);
-
-        // Create the "Back to Main Menu" button
-        Button mainMenuBtn = ButtonMenu.getMainMenuBtn(primaryStage, gameOverPane, customFont, pane, mainMenuScene);
-
-        // Add buttons to the game over pane
-        gameOverPane.getChildren().addAll(restartBtn, mainMenuBtn);
-
-        // gameOverText
-        Text gameOverText = new Text("Game  Over");
-        gameOverText.setFont(Font.font("Verdana", FontWeight.BOLD, 30));
-        gameOverText.setLayoutX(75);
-        gameOverText.setLayoutY(60);
-        gameOverText.setFill(Color.WHITE);
-        gameOverPane.getChildren().add(gameOverText);
-
-        // scoreText
-        Text scoreText = new Text("Your Score: " + currentPoints);
-        scoreText.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
-        scoreText.setLayoutX(110);
-        scoreText.setLayoutY(95);
-        scoreText.setFill(Color.WHITE);
-        gameOverPane.getChildren().add(scoreText);
-
-        // code to ask the player to enter a name
+    private void askForPlayerName() {
         Platform.runLater(() -> {
             TextInputDialog dialog = new TextInputDialog("");
             dialog.setTitle("Game Over");
@@ -482,24 +359,15 @@ public class Main extends Application {
                 }
             }
         });
-
-        // Add the game over pane to the game pane
-        pane.getChildren().add(gameOverPane);
     }
-
-    private Button getRestartBtn(Stage primaryStage, Pane gameOverPane) {
-        Button restartBtn = new Button("Restart");
-        restartBtn.setFont(customFont);
-        restartBtn.setOnAction(e -> {
-            pane.getChildren().remove(gameOverPane);
-            pane.getChildren().remove(gameOverContainer);
-            startNewGame(primaryStage);
-        });
-        restartBtn.setLayoutX(135);
-        restartBtn.setLayoutY(125);
-        return restartBtn;
+    private void addTextToPane(Pane pane, String text, double x, double y, int fontSize) {
+        Text newText = new Text(text);
+        newText.setFont(Font.font("Verdana", FontWeight.BOLD, fontSize));
+        newText.setLayoutX(x);
+        newText.setLayoutY(y);
+        newText.setFill(Color.WHITE);
+        pane.getChildren().add(newText);
     }
-
     private void startNewGame(Stage primaryStage) {
         // Reset player's life, score, and other game states
         asteroids = new ArrayList<>();
@@ -518,9 +386,7 @@ public class Main extends Application {
         AnimationTimer getAnimationTimer = getAnimationTimer(primaryStage);
         getAnimationTimer.start();
         escToPause(primaryStage, getAnimationTimer);
-
     }
-
     private void escToPause(Stage primaryStage, AnimationTimer getAnimationTimer) {
         scene.addEventHandler(KeyEvent.KEY_PRESSED, e3 -> {
             if (e3.getCode() == KeyCode.ESCAPE) {
@@ -538,8 +404,6 @@ public class Main extends Application {
             }
         });
     }
-
-
     private void recordNameScore(String name) {
         // Implement the logic to record the player's score
         try {
@@ -560,6 +424,40 @@ public class Main extends Application {
             System.out.println("File is not found");
         }
     }
+    private void showGameInfo() {
+        infoLabel.setText("  Score: " + currentPoints + "  \n  Life: " +
+                (ship.getLives() + 1) + "  \n  Level: " + changeLevel());
+    }
+
+    // button click events
+    Consumer<Stage> gameStartFunction = primaryStage -> {
+        asteroids = new ArrayList<>();
+        aliens = new ArrayList<>();
+        projectiles = new ArrayList<>();
+        alienProjectiles = new ArrayList<>();
+        pressedKeys = new HashMap<>();
+        mainGameScene(primaryStage);
+        AnimationTimer getAnimationTimer = getAnimationTimer(primaryStage);
+        getAnimationTimer.start();
+        primaryStage.show();
+
+        // Detect ESC key press event
+        escToPause(primaryStage, getAnimationTimer);
+    };
+    Consumer<Stage> highScoreFunction = primaryStage -> {
+        try {
+            highScoreMenu();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    };
+    Consumer<Stage> resumeFunction = primaryStage -> {
+        pane.getChildren().remove(pauseMenuPane);
+        pane.getChildren().remove(pauseMenuContainer);
+        isPaused = false;
+    };
+    Consumer<Stage> restartFunction = this::startNewGame;
+
 
     private AnimationTimer getAnimationTimer(Stage primaryStage) {
         return new AnimationTimer() {
@@ -605,10 +503,6 @@ public class Main extends Application {
         };
     }
 
-    private void showGameInfo() {
-        infoLabel.setText("  Score: " + currentPoints + "  \n  Life: " + (ship.getLives() + 1) + "  \n  Level: " + changeLevel());
-    }
-
     private void checkCollisionOfShip(FlyingObject obj, Stage primaryStage, AnimationTimer getAnimationTimer) throws Exception {
         if (ship.collide(obj) && ship.getLives() == 0 && !ship.isInvincibility()) {
             // play explosion sound
@@ -642,10 +536,6 @@ public class Main extends Application {
             ship.setInvincibility(false);
             ship.getShape().setFill(Color.YELLOW);
         }
-    }
-
-    private AtomicInteger getAtomicInteger() {
-        return new AtomicInteger();
     }
 
     private void addRoles(Pane pane) {
@@ -693,7 +583,6 @@ public class Main extends Application {
             }
         }
     }
-
 
     private void createAliens(Pane pane) {
         //if a random number is less 0.005, a new aliens will be added to the window.
@@ -1019,7 +908,7 @@ public class Main extends Application {
     }
 
     private void bonusLife() {
-        System.out.println("work");
+        System.out.println("hit");
         if (lastPoints >= 5000) {
             lastPoints -= 5000;
             if (ship.getLives() <= 5) {
@@ -1033,7 +922,6 @@ public class Main extends Application {
     //make all asteroids can move
     private void moveObjects() {
         asteroids.forEach(Asteroid::move);
-//        projectiles.forEach(projectile -> projectile.move());
         aliens.forEach(FlyingObject::move);
     }
 
