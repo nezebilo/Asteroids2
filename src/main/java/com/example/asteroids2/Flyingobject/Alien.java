@@ -10,7 +10,7 @@ public class Alien extends FlyingObject {
     // timer is used to create zig-zag movement
     private int timer;
     // interval is how long between changing vertical direction
-    private static int INTERVAL = 100;
+    private static final int INTERVAL = 100;
 
     // zig movement
     private Point2D zig;
@@ -61,7 +61,7 @@ public class Alien extends FlyingObject {
         super.move();
 
         // if interval is exceeded we change the movement
-        if (this.timer >= this.INTERVAL) {
+        if (this.timer >= INTERVAL) {
             if (this.zigOrZag) {
                 this.setMovement(this.zig);
                 this.zigOrZag = false;
