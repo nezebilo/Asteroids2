@@ -11,11 +11,11 @@ public enum Level {
 
     private int level;
 
-    Level(int level){
+    Level(int level) {
         this.level = level;
     }
 
-    public int setLevel(){
+    public int setLevel() {
         return level;
     }
 

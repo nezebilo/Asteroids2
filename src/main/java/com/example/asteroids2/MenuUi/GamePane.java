@@ -13,14 +13,15 @@ public class GamePane {
 
     private final ImageView backgroundView;
 
-    public GamePane(int x, int y,String link){
+    public GamePane(int x, int y, String link) {
         backgroundView = LayoutElement.getBackgroundView(link, x, y);
         pane = new Pane();
         container = new StackPane();
         tempPane = new StackPane();
         pane.setPrefSize(x, y);
     }
-    public GamePane(int x, int y , String link, Pane parentPane){
+
+    public GamePane(int x, int y, String link, Pane parentPane) {
         backgroundView = LayoutElement.getBackgroundView(link, x, y);
         pane = new Pane();
         container = new StackPane();
@@ -38,23 +39,23 @@ public class GamePane {
         parentPane.getChildren().add(container);
     }
 
-    public void setPosition(int x, int y){
+    public void setPosition(int x, int y) {
         pane.setLayoutX(x);
         pane.setLayoutY(y);
     }
 
-    public void setBg(Pane parentPane){
+    public void setBg(Pane parentPane) {
         container.getChildren().addAll(backgroundView, pane);
         container.setLayoutX(parentPane.getLayoutX());
         container.setLayoutY(parentPane.getLayoutY());
         parentPane.getChildren().add(container);
     }
 
-    public void setBg(){
+    public void setBg() {
         tempPane.getChildren().addAll(backgroundView, pane);
     }
 
-    public void setBg(VBox vBox){
+    public void setBg(VBox vBox) {
         container.getChildren().addAll(backgroundView, vBox);
     }
 
@@ -70,7 +71,7 @@ public class GamePane {
         return container;
     }
 
-    public void addElement(Node node){
+    public void addElement(Node node) {
         pane.getChildren().add(node);
     }
 

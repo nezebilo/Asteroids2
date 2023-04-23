@@ -7,12 +7,12 @@ public enum Size {
 
     private int size;
 
-    Size(int size){
+    Size(int size) {
         this.size = size;
     }
 
-    public  int setSize(){
-        return  size;
+    public int setSize() {
+        return size;
     }
 
 }

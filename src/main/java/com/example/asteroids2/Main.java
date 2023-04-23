@@ -154,7 +154,8 @@ public class Main extends Application {
         primaryStage.setScene(mainMenuScene);
         primaryStage.show();
     }
-    private void mainGameScene(Stage primaryStage){
+
+    private void mainGameScene(Stage primaryStage) {
         GamePane tempPane = new GamePane(WIDTH, HEIGHT, "/imageAndFont/mainGameBackground.jpg");
         tempPane.setPosition(WIDTH, HEIGHT);
 
@@ -180,6 +181,7 @@ public class Main extends Application {
         mainGameScene = new Scene(tempPane.getTempPane());
         primaryStage.setScene(mainGameScene);
     }
+
     private void highScoreMenu() throws IOException {
         // Create the high score Pane
         GamePane highScorePane = new GamePane(400, 340, "/imageAndFont/mainGameBackground.jpg");
@@ -207,6 +209,7 @@ public class Main extends Application {
 
         highScorePane.addElement(highScoreListView);
     }
+
     private void gameOver(Stage primaryStage, AnimationTimer animationTimer) {
         // Create the game over Pane
         GamePane gameOverPane = new GamePane(350, 250, "/imageAndFont/box.png", mainGamePane);
@@ -239,6 +242,7 @@ public class Main extends Application {
         // Add the game over mainGamePane to the game mainGamePane
         mainGamePane.getChildren().add(gameOverPane.getPane());
     }
+
     private void showPauseMenu(Stage primaryStage, AnimationTimer getAnimationTimer) {
         // creat pause Pane
         GamePane pausePane = new GamePane(300, 200, "/imageAndFont/box.png", mainGamePane);
@@ -249,7 +253,7 @@ public class Main extends Application {
 
         // add buttons
         Button resumeBtn = getResumeBtn(getAnimationTimer, resumeFunction, pauseMenuPane);
-        Button quitGameBtn = LayoutElement.getQuitGameBtn(primaryStage,pausePane.getPane());
+        Button quitGameBtn = LayoutElement.getQuitGameBtn(primaryStage, pausePane.getPane());
 
         pausePane.addElement(resumeBtn);
         pausePane.addElement(quitGameBtn);
@@ -296,20 +300,21 @@ public class Main extends Application {
             }
         }
     }
+
     private void mainGameTextInfo() {
-        infoLabel = new Label("  Score: "+ currentPoints +"  \n  Life: " +
-                (ship.getLives()+1) +  "\n  Level: " + changeLevel());
+        infoLabel = new Label("  Score: " + currentPoints + "  \n  Life: " +
+                (ship.getLives() + 1) + "\n  Level: " + changeLevel());
         // Set the font color to white
         infoLabel.setTextFill(Color.WHITE);
         infoLabel.setFont(customFont);
 
         Label playInstructMainMenu = new Label("""
-                   UP: Acceleration
-                   DOWN: Deceleration
-                   B: Brake
+                   UP: Acceleration                    
                    LEFT & RIGHT: Rotate
+                   DOWN: Deceleration
                    SPACE: Fire
-                   J: Hyperspace Jump
+                   J: Hyperspace Jump                   
+                   B: Brake
                    ESC: Pause Game\
                 """);
         playInstructMainMenu.setTextFill(Color.WHITE);
@@ -319,6 +324,7 @@ public class Main extends Application {
         mainGamePane.getChildren().add(infoLabel);
         mainGamePane.getChildren().add(playInstructMainMenu);
     }
+
     private void askForPlayerName() {
         Platform.runLater(() -> {
             TextInputDialog dialog = new TextInputDialog("");
@@ -339,6 +345,7 @@ public class Main extends Application {
             }
         });
     }
+
     private void addTextToPane(Pane pane, String text, double x, double y, int fontSize) {
         Text newText = new Text(text);
         newText.setFont(Font.font("Verdana", FontWeight.BOLD, fontSize));
@@ -347,6 +354,7 @@ public class Main extends Application {
         newText.setFill(Color.WHITE);
         pane.getChildren().add(newText);
     }
+
     private void startNewGame(Stage primaryStage) {
         // Reset player's life, score, and other game states
         asteroids = new ArrayList<>();
@@ -367,6 +375,7 @@ public class Main extends Application {
         getAnimationTimer.start();
         escToPause(primaryStage, getAnimationTimer);
     }
+
     private void escToPause(Stage primaryStage, AnimationTimer getAnimationTimer) {
         mainGameScene.addEventHandler(KeyEvent.KEY_PRESSED, e3 -> {
             if (e3.getCode() == KeyCode.ESCAPE) {
@@ -384,6 +393,7 @@ public class Main extends Application {
             }
         });
     }
+
     private void recordNameScore(String name) {
         // Implement the logic to record the player's score
         try {
@@ -404,6 +414,7 @@ public class Main extends Application {
             System.out.println("File is not found");
         }
     }
+
     private void showGameInfo() {
         infoLabel.setText("  Score: " + currentPoints + "  \n  Life: " +
                 (ship.getLives() + 1) + "  \n  Level: " + changeLevel());
@@ -570,9 +581,9 @@ public class Main extends Application {
     }
 
     private void createAliens(Pane pane) {
-        //if a random number is less 0.005, a new aliens will be added to the window.
+        //if a random number is less 0.003, a new aliens will be added to the window.
         if (Math.random() < CREATED_PROBABILITY && (aliens.size() <= ALIEN_EXISTING_MAXIMUM)) {
-            if (((System.currentTimeMillis() - startTime) > MODERATE_TIME.setLevel()) &
+            if (((System.currentTimeMillis() - startTime) > MODERATE_TIME.setLevel()) &&
                     ((System.currentTimeMillis() - startTime) <= HARD_TIME.setLevel())) {
                 Alien alien = new Alien(WIDTH, HEIGHT, 1);
                 if (!alien.collide(ship)) {
@@ -581,7 +592,7 @@ public class Main extends Application {
                     alien.getShape().setStroke(Color.RED);
                     pane.getChildren().add(alien.getShape());
                 }
-            } else {
+            } else if ((System.currentTimeMillis() - startTime) > HARD_TIME.setLevel()){
                 Alien alien = new Alien(WIDTH, HEIGHT, 2);
                 if (!alien.collide(ship)) {
                     aliens.add(alien);
@@ -595,9 +606,9 @@ public class Main extends Application {
     }
 
     private void controlShip() {
-        mainGameScene.setOnKeyPressed(event ->  pressedKeys.put(event.getCode(), Boolean.TRUE));
+        mainGameScene.setOnKeyPressed(event -> pressedKeys.put(event.getCode(), Boolean.TRUE));
 
-        mainGameScene.setOnKeyReleased(event ->  pressedKeys.put(event.getCode(), Boolean.FALSE));
+        mainGameScene.setOnKeyReleased(event -> pressedKeys.put(event.getCode(), Boolean.FALSE));
 
         if (pressedKeys.getOrDefault(KeyCode.LEFT, false)) {
             ship.turnLeft();
@@ -622,11 +633,11 @@ public class Main extends Application {
 
         //This function is used to slow down the ship, but our project does not need this function.
         if (pressedKeys.getOrDefault(KeyCode.DOWN, false)) {
-                ship.decelerate();
+            ship.decelerate();
         }
         // Brake
         if (pressedKeys.getOrDefault(KeyCode.B, false)) {
-                ship.setMovement(new Point2D(0,0));
+            ship.setMovement(new Point2D(0, 0));
         }
 
         if (pressedKeys.getOrDefault(KeyCode.J, false)) {
