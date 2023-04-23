@@ -36,4 +36,14 @@ public class Ship extends FlyingObject {
         this.invincibility = invincibility;
     }
 
+    public void decelerate() {
+        double changeX = Math.cos(Math.toRadians(this.shape.getRotate()));
+        double changeY = Math.sin(Math.toRadians(this.shape.getRotate()));
+
+        changeX *= 0.005;
+        changeY *= 0.005;
+
+        this.movement = this.movement.subtract(changeX, changeY);
+    }
+
 }
