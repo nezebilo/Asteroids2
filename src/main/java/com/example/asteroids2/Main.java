@@ -507,6 +507,7 @@ public class Main extends Application {
             ship = new Ship(WIDTH / 2, HEIGHT / 2);
             ship.setInvincibility(true);
             ship.setLives(temp);
+            showGameInfo();
             //Change the colour of the reborn ship
             ship.getShape().setFill(Color.RED);
             mainGamePane.getChildren().add(ship.getShape());
