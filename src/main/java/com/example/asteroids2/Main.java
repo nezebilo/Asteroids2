@@ -115,10 +115,6 @@ public class Main extends Application {
     Media jumpSFXSound = new Media(new File(jumpSFXFile).toURI().toString());
     MediaPlayer jumpSFX = new MediaPlayer(jumpSFXSound);
 
-
-    public Main() {
-    }
-
     @Override
     public void start(Stage primaryStage) {
         mainMenuScene(primaryStage);
@@ -465,6 +461,7 @@ public class Main extends Application {
                 collision(primaryStage, this);
                 moveObjects();
                 removeProjectiles();
+                levelShowingChange();
 
 
                 //Once a collision occurs, game stops
@@ -906,6 +903,12 @@ public class Main extends Application {
     private void moveObjects() {
         asteroids.forEach(Asteroid::move);
         aliens.forEach(FlyingObject::move);
+    }
+
+    private void levelShowingChange(){
+        if((System.currentTimeMillis() - startTime) % 10000 < 20){
+            showGameInfo();
+        }
     }
 
     public static void main(String[] args) {
