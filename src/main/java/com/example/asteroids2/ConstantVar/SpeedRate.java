@@ -2,8 +2,8 @@ package com.example.asteroids2.ConstantVar;
 
 public enum SpeedRate {
     LOWER(1),
-    NORMAL(2),
-    FASTER(3);
+    NORMAL(3),
+    FASTER(5);
 
     private int speedRate;
 
