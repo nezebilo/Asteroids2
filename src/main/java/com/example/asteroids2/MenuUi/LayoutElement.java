@@ -1,4 +1,5 @@
 package com.example.asteroids2.MenuUi;
+
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -11,6 +12,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Objects;
@@ -40,7 +42,7 @@ public class LayoutElement {
         Button quitGameBtn = new Button("Quit Game");
         quitGameBtn.setFont(customFont);
 
-        quitGameBtn.setOnAction(e ->  primaryStage.close());
+        quitGameBtn.setOnAction(e -> primaryStage.close());
         quitGameBtn.setLayoutX((pauseMenuPane.getPrefWidth() - quitGameBtn.getWidth()) / 3);
         quitGameBtn.setLayoutY((pauseMenuPane.getPrefHeight() - quitGameBtn.getHeight()) / 1.8);
         return quitGameBtn;

@@ -7,12 +7,12 @@ public enum SpeedRate {
 
     private int speedRate;
 
-    SpeedRate(int speedRate){
+    SpeedRate(int speedRate) {
         this.speedRate = speedRate;
     }
 
-    public  int setSpeedRate(){
-        return  speedRate;
+    public int setSpeedRate() {
+        return speedRate;
     }
 
 }

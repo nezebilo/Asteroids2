@@ -22,17 +22,17 @@ public class Alien extends FlyingObject {
 
     public Alien(int x, int y, int speedTimes) {
         super(new Polygon(-30.0, 0.0,
-                30,0,
-                8,8,
-                -8,8,
-                -30,0,
-                -8,-8,
-                -5,-12,
-                5,-12,
-                8,-8,
-                -8,-8,
-                8,-8,
-                30,0), x, y);
+                30, 0,
+                8, 8,
+                -8, 8,
+                -30, 0,
+                -8, -8,
+                -5, -12,
+                5, -12,
+                8, -8,
+                -8, -8,
+                8, -8,
+                30, 0), x, y);
 
         //control the speed of a created alien
         getAccelerationAmount(speedTimes);
@@ -41,9 +41,9 @@ public class Alien extends FlyingObject {
     }
 
     public void getAccelerationAmount(int num) {
-        Random random =new Random();
-        double changeX = random.nextDouble(-1,1);
-        double changeY = random.nextDouble(-1,1);
+        Random random = new Random();
+        double changeX = random.nextDouble(-1, 1);
+        double changeY = random.nextDouble(-1, 1);
 
         for (int i = 0; i < num; i++) {
             changeX *= 0.6;
@@ -52,7 +52,7 @@ public class Alien extends FlyingObject {
         }
 
         // set zig and zag movement
-        this.zig = new Point2D(- movement.getX() * 0.75, movement.getY());
+        this.zig = new Point2D(-movement.getX() * 0.75, movement.getY());
         this.zag = new Point2D(movement.getX() * 1.5, 0);
     }
 
@@ -65,8 +65,7 @@ public class Alien extends FlyingObject {
             if (this.zigOrZag) {
                 this.setMovement(this.zig);
                 this.zigOrZag = false;
-            }
-            else {
+            } else {
                 this.setMovement(this.zag);
                 this.zigOrZag = true;
             }
@@ -77,7 +76,6 @@ public class Alien extends FlyingObject {
         // increment the timer
         this.timer++;
     }
-
 
 
 }

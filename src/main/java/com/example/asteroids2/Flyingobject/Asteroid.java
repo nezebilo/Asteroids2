@@ -12,22 +12,23 @@ public class Asteroid extends FlyingObject {
     protected int size;
 
     protected int speedTimes;
-    public Asteroid(int x, int y,  int size, int speedTimes) {
+
+    public Asteroid(int x, int y, int size, int speedTimes) {
         super(createPolygon(size), x, y);
-        this.size=size;
+        this.size = size;
         //Set it to rotate at a random angle
         Random rnd = new Random();
         super.getShape().setRotate(rnd.nextInt(360));
 
         //control the speed of a created asteroid
         //the size is bigger, the speed is lower
-        if(size == 3){
+        if (size == 3) {
             this.speedTimes = 1 + speedTimes;
             getAccelerationAmount(this.speedTimes);
         } else if (size == 2) {
             this.speedTimes = 2 + speedTimes;
             getAccelerationAmount(this.speedTimes);
-        }else {
+        } else {
             this.speedTimes = 3 + speedTimes;
             getAccelerationAmount(this.speedTimes);
         }
@@ -50,7 +51,7 @@ public class Asteroid extends FlyingObject {
         Random rnd = new Random();
 
         int numSides = rnd.nextInt(3) + 4;
-        double size = 10*times + rnd.nextInt(10);
+        double size = 10 * times + rnd.nextInt(10);
 
         Polygon polygon = new Polygon();
         for (int i = 0; i < numSides; i++) {

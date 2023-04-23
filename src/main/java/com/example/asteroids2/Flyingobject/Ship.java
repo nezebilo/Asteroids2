@@ -11,15 +11,15 @@ public class Ship extends FlyingObject {
                 -10, -10,
                 20, 0,
                 -10, 10,
-                -5,0,
-                -10,-10), x, y);
+                -5, 0,
+                -10, -10), x, y);
         //In a game, players have two chances to revive.
         this.setRotate();
         this.invincibility = false;
         this.setLives(3);
     }
 
-    public void setRotate(){
+    public void setRotate() {
         this.shape.setRotate(this.shape.getRotate() + 270);
     }
 
