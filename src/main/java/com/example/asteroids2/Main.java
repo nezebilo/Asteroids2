@@ -286,6 +286,7 @@ public class Main extends Application {
         }
         return highScores;
     }
+
     private void readFile() throws IOException {
         FileReader highScoreFile = new FileReader("src/main/java/com/example/asteroids2/highScores.txt");
         BufferedReader bufferedReader = new BufferedReader(highScoreFile);
@@ -891,8 +892,6 @@ public class Main extends Application {
     }
 
     private void bonusLife() {
-        System.out.println("hit");
-        System.out.println(lastPoints);
         if (lastPoints >= 5000) {
             lastPoints -= 5000;
             if (ship.getLives() <= 5) {
