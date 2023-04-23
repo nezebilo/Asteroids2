@@ -360,6 +360,7 @@ public class Main extends Application {
         pressedKeys = new HashMap<>();
 
         currentPoints = 0;
+        lastPoints = 0;
         ship = new Ship(WIDTH / 2, HEIGHT / 2);
 
         startTime = System.currentTimeMillis();
@@ -420,6 +421,8 @@ public class Main extends Application {
         projectiles = new ArrayList<>();
         alienProjectiles = new ArrayList<>();
         pressedKeys = new HashMap<>();
+        currentPoints = 0;
+        lastPoints = 0;
         mainGameScene(primaryStage);
         AnimationTimer getAnimationTimer = getAnimationTimer(primaryStage);
         getAnimationTimer.start();
