@@ -888,7 +888,6 @@ public class Main extends Application {
     }
 
     private void bonusLife() {
-        System.out.println("hit");
         if (lastPoints >= 5000) {
             lastPoints -= 5000;
             if (ship.getLives() <= 5) {
